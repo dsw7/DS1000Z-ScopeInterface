@@ -1,8 +1,10 @@
+#include "client.hpp"
 #include "parameters.hpp"
 
 #include <cstring>
 #include <getopt.h>
 #include <iostream>
+#include <stdexcept>
 #include <string>
 
 void print_help_messages()
@@ -72,9 +74,14 @@ int main(int argc, char **argv)
         return 1;
     }
 
-    std::cout << params.timebase_s << '\n';
-    std::cout << params.port_s << '\n';
-    std::cout << params.host.value() << '\n';
+    try {
+        params.run_conversions();
+    } catch (const std::runtime_error &e) {
+        std::cerr << e.what() << '\n';
+        exit(EXIT_FAILURE);
+    }
+
+    client::send_message(params);
 
     return 0;
 }

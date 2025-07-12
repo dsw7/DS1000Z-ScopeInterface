@@ -16,5 +16,7 @@ add_compile_options(-Wall -Wextra -pedantic -Werror)
 include_directories(src)
 add_executable(
   scope
+  client.cpp
   main.cpp
+  parameters.cpp
 )
