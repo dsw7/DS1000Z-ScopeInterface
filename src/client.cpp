@@ -148,4 +148,14 @@ void TCPConn::single()
     this->send_message_(":SING");
 }
 
+void TCPConn::set_timebase(float sec)
+{
+    if (sec < 0) {
+        throw std::invalid_argument("Seconds must be greater than 0");
+    }
+
+    std::cout << "Setting timebase scale to " << sec << " seconds / division\n";
+    this->send_message_(":TIM:MAIN:SCAL " + std::to_string(sec));
+}
+
 } // namespace client

@@ -14,6 +14,7 @@ public:
     void run();
     void stop();
     void single();
+    void set_timebase(float sec);
 
 private:
     int check_for_error_(std::string &errmsg);
