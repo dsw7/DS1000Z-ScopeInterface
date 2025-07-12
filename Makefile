@@ -4,7 +4,7 @@
 BUILD_DIR = build
 
 format:
-	@clang-format -i --verbose --style=file src/*.cpp #src/*.hpp
+	@clang-format -i --verbose --style=file src/*.cpp src/*.hpp
 
 compile: format
 	@cmake -S src -B $(BUILD_DIR)
