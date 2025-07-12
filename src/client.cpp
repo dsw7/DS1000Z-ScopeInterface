@@ -22,6 +22,8 @@ public:
     int check_for_error(std::string &errmsg);
 
     void handshake();
+    void run();
+    void stop();
 
 private:
     int client_fd_;
@@ -137,6 +139,18 @@ void TCPConn::handshake()
     std::cout << "Connection successful. Resolved system language: " << system_language << '\n';
 }
 
+void TCPConn::run()
+{
+    std::cout << "Pressing RUN button\n";
+    this->send_message(":RUN");
+}
+
+void TCPConn::stop()
+{
+    std::cout << "Pressing STOP button\n";
+    this->send_message(":STOP");
+}
+
 } // namespace
 
 namespace client {
@@ -146,6 +160,8 @@ void send_message(const parameters::Parameters &params)
     TCPConn tcp_conn;
     tcp_conn.establish_connection(params.host.value(), params.port);
     tcp_conn.handshake();
+    tcp_conn.run();
+    tcp_conn.stop();
 }
 
 } // namespace client
