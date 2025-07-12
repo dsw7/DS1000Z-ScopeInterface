@@ -1,5 +1,6 @@
 #include "parameters.hpp"
 
+#include <cstring>
 #include <getopt.h>
 #include <iostream>
 #include <string>
@@ -12,7 +13,7 @@ Automation for working with Rigol DS1000Z Series of oscilloscopes
 
 Usage:
   scope [OPTION]
-  scope [OPTION]... HOST PORT
+  scope [OPTION]... HOST
 
 Options:
   -h, --help      Print help information and exit
@@ -32,11 +33,12 @@ int main(int argc, char **argv)
         static struct option long_options[] = {
             { "help", no_argument, 0, 'h' },
             { "timebase", no_argument, 0, 't' },
+            { "port", no_argument, 0, 'p' },
             { 0, 0, 0, 0 },
         };
 
         int option_index = 0;
-        int c = getopt_long(argc, argv, "ht:", long_options, &option_index);
+        int c = getopt_long(argc, argv, "ht:p:", long_options, &option_index);
 
         if (c == -1) {
             break;
@@ -49,13 +51,30 @@ int main(int argc, char **argv)
             case 't':
                 params.timebase_s = optarg;
                 break;
+            case 'p':
+                params.port_s = optarg;
+                break;
             default:
                 print_help_messages();
                 exit(EXIT_FAILURE);
         }
     };
 
+    for (int i = optind; i < argc; i++) {
+        if (strcmp("scope", argv[i]) != 0) {
+            params.host = argv[i];
+            break;
+        }
+    }
+
+    if (not params.host) {
+        std::cerr << "Host argument is not set!\n";
+        return 1;
+    }
+
     std::cout << params.timebase_s << '\n';
+    std::cout << params.port_s << '\n';
+    std::cout << params.host.value() << '\n';
 
     return 0;
 }
