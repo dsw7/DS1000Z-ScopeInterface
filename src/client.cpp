@@ -142,4 +142,10 @@ void TCPConn::stop()
     this->send_message_(":STOP");
 }
 
+void TCPConn::single()
+{
+    std::cout << "Pressing SINGLE button\n";
+    this->send_message_(":SING");
+}
+
 } // namespace client

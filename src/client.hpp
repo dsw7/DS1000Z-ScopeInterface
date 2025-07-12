@@ -13,6 +13,7 @@ public:
     void handshake();
     void run();
     void stop();
+    void single();
 
 private:
     int check_for_error_(std::string &errmsg);
