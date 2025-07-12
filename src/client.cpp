@@ -20,6 +20,7 @@ public:
     void send_message(const std::string &message);
     std::string receive_message();
     int check_for_error(std::string &errmsg);
+
     void handshake();
 
 private:
@@ -84,7 +85,15 @@ std::string TCPConn::receive_message()
     }
 
     buffer[bytes_received] = '\0';
-    return std::string(buffer);
+    std::string message(buffer);
+
+    if (not message.empty()) {
+        if (message.back() == '\n') {
+            message.pop_back();
+        }
+    }
+
+    return message;
 }
 
 int TCPConn::check_for_error(std::string &errmsg)
