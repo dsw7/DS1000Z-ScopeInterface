@@ -65,10 +65,17 @@ void TCPConn::establish_connection(const std::string &host, int port)
 
 void TCPConn::send_message(const std::string &message)
 {
-    static std::string terminator = "\r\n";
-    const std::string msg_with_term = message + terminator;
+    if (message.empty()) {
+        throw std::runtime_error("Cannot send empty message");
+    }
 
-    int bytes_sent = send(this->client_fd_, msg_with_term.c_str(), msg_with_term.size(), 0);
+    std::string message_ = message;
+
+    if (message_.back() != '\n') {
+        message_.push_back('\n');
+    }
+
+    int bytes_sent = send(this->client_fd_, message_.c_str(), message_.size(), 0);
 
     if (bytes_sent == -1) {
         throw std::runtime_error(std::strerror(errno));
@@ -123,7 +130,6 @@ void TCPConn::handshake()
     const std::string system_language = this->receive_message();
 
     std::string errmsg;
-
     if (this->check_for_error(errmsg) < 0) {
         throw std::runtime_error(errmsg);
     }
