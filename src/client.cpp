@@ -4,6 +4,7 @@
 #include <cerrno>
 #include <cstring>
 #include <iostream>
+#include <sstream>
 #include <stdexcept>
 #include <string.h>
 #include <sys/socket.h>
@@ -17,6 +18,9 @@ public:
     ~TCPConn();
     void establish_connection(const std::string &host, int port);
     void send_message(const std::string &message);
+    std::string receive_message();
+    int check_for_error(std::string &errmsg);
+    void handshake();
 
 private:
     int client_fd_;
@@ -60,13 +64,62 @@ void TCPConn::establish_connection(const std::string &host, int port)
 
 void TCPConn::send_message(const std::string &message)
 {
-    int bytes_sent = send(this->client_fd_, message.c_str(), message.size(), 0);
+    static std::string terminator = "\r\n";
+    const std::string msg_with_term = message + terminator;
+
+    int bytes_sent = send(this->client_fd_, msg_with_term.c_str(), msg_with_term.size(), 0);
 
     if (bytes_sent == -1) {
         throw std::runtime_error(std::strerror(errno));
     }
+}
 
-    std::cout << bytes_sent << '\n';
+std::string TCPConn::receive_message()
+{
+    char buffer[1024];
+    int bytes_received = recv(this->client_fd_, buffer, sizeof(buffer) - 1, 0);
+
+    if (bytes_received == -1) {
+        throw std::runtime_error(std::strerror(errno));
+    }
+
+    buffer[bytes_received] = '\0';
+    return std::string(buffer);
+}
+
+int TCPConn::check_for_error(std::string &errmsg)
+{
+    this->send_message(":SYST:ERR?");
+    const std::string error = this->receive_message();
+
+    std::istringstream err_stream(error);
+    int code = 0;
+
+    if (std::getline(err_stream, errmsg, ',')) {
+        code = std::stoi(errmsg);
+
+        if (std::getline(err_stream, errmsg)) {
+            errmsg.erase(0, errmsg.find_first_not_of(" \t\n\r"));
+        }
+    }
+
+    return code;
+}
+
+void TCPConn::handshake()
+{
+    std::cout << "Handshaking with device\n";
+
+    this->send_message(":SYST:LANG?");
+    const std::string system_language = this->receive_message();
+
+    std::string errmsg;
+
+    if (this->check_for_error(errmsg) < 0) {
+        throw std::runtime_error(errmsg);
+    }
+
+    std::cout << "Connection successful. Resolved system language: " << system_language << '\n';
 }
 
 } // namespace
@@ -77,7 +130,7 @@ void send_message(const parameters::Parameters &params)
 {
     TCPConn tcp_conn;
     tcp_conn.establish_connection(params.host.value(), params.port);
-    tcp_conn.send_message(":TIMebase:MAIN:SCALe 0.005\r\n");
+    tcp_conn.handshake();
 }
 
 } // namespace client

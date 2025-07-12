@@ -76,12 +76,11 @@ int main(int argc, char **argv)
 
     try {
         params.run_conversions();
+        client::send_message(params);
     } catch (const std::runtime_error &e) {
-        std::cerr << e.what() << '\n';
+        std::cerr << "An error occurred: " << e.what() << '\n';
         exit(EXIT_FAILURE);
     }
-
-    client::send_message(params);
 
     return 0;
 }
