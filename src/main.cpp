@@ -1,5 +1,5 @@
-#include "client.hpp"
 #include "parameters.hpp"
+#include "workflows.hpp"
 
 #include <cstring>
 #include <getopt.h>
@@ -76,7 +76,7 @@ int main(int argc, char **argv)
 
     try {
         params.run_conversions();
-        client::send_message(params);
+        workflows::example(params);
     } catch (const std::runtime_error &e) {
         std::cerr << "An error occurred: " << e.what() << '\n';
         exit(EXIT_FAILURE);

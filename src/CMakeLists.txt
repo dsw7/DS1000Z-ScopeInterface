@@ -19,4 +19,5 @@ add_executable(
   client.cpp
   main.cpp
   parameters.cpp
+  workflows.cpp
 )

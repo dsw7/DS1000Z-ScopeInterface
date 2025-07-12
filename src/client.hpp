@@ -1,7 +1,5 @@
 #pragma once
 
-#include "parameters.hpp"
-
 #include <string>
 
 namespace client {
@@ -24,5 +22,4 @@ private:
     int client_fd_;
 };
 
-void send_message(const parameters::Parameters &params);
 } // namespace client
