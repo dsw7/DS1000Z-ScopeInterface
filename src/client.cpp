@@ -10,24 +10,74 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
-namespace {
+namespace client {
 
-class TCPConn {
-public:
-    TCPConn();
-    ~TCPConn();
-    void establish_connection(const std::string &host, int port);
-    void send_message(const std::string &message);
-    std::string receive_message();
-    int check_for_error(std::string &errmsg);
+// ----------------------------------------------------------------------------------------------------------
+// private
+// ----------------------------------------------------------------------------------------------------------
 
-    void handshake();
-    void run();
-    void stop();
+void TCPConn::send_message_(const std::string &message)
+{
+    if (message.empty()) {
+        throw std::runtime_error("Cannot send empty message");
+    }
 
-private:
-    int client_fd_;
-};
+    std::string message_ = message;
+
+    if (message_.back() != '\n') {
+        message_.push_back('\n');
+    }
+
+    int bytes_sent = send(this->client_fd_, message_.c_str(), message_.size(), 0);
+
+    if (bytes_sent == -1) {
+        throw std::runtime_error(std::strerror(errno));
+    }
+}
+
+std::string TCPConn::receive_message_()
+{
+    char buffer[1024];
+    int bytes_received = recv(this->client_fd_, buffer, sizeof(buffer) - 1, 0);
+
+    if (bytes_received == -1) {
+        throw std::runtime_error(std::strerror(errno));
+    }
+
+    buffer[bytes_received] = '\0';
+    std::string message(buffer);
+
+    if (not message.empty()) {
+        if (message.back() == '\n') {
+            message.pop_back();
+        }
+    }
+
+    return message;
+}
+
+int TCPConn::check_for_error_(std::string &errmsg)
+{
+    this->send_message_(":SYST:ERR?");
+    const std::string error = this->receive_message_();
+
+    std::istringstream err_stream(error);
+    int code = 0;
+
+    if (std::getline(err_stream, errmsg, ',')) {
+        code = std::stoi(errmsg);
+
+        if (std::getline(err_stream, errmsg)) {
+            errmsg.erase(0, errmsg.find_first_not_of(" \t\n\r"));
+        }
+    }
+
+    return code;
+}
+
+// ----------------------------------------------------------------------------------------------------------
+// public
+// ----------------------------------------------------------------------------------------------------------
 
 TCPConn::TCPConn()
 {
@@ -65,74 +115,15 @@ void TCPConn::establish_connection(const std::string &host, int port)
     }
 }
 
-void TCPConn::send_message(const std::string &message)
-{
-    if (message.empty()) {
-        throw std::runtime_error("Cannot send empty message");
-    }
-
-    std::string message_ = message;
-
-    if (message_.back() != '\n') {
-        message_.push_back('\n');
-    }
-
-    int bytes_sent = send(this->client_fd_, message_.c_str(), message_.size(), 0);
-
-    if (bytes_sent == -1) {
-        throw std::runtime_error(std::strerror(errno));
-    }
-}
-
-std::string TCPConn::receive_message()
-{
-    char buffer[1024];
-    int bytes_received = recv(this->client_fd_, buffer, sizeof(buffer) - 1, 0);
-
-    if (bytes_received == -1) {
-        throw std::runtime_error(std::strerror(errno));
-    }
-
-    buffer[bytes_received] = '\0';
-    std::string message(buffer);
-
-    if (not message.empty()) {
-        if (message.back() == '\n') {
-            message.pop_back();
-        }
-    }
-
-    return message;
-}
-
-int TCPConn::check_for_error(std::string &errmsg)
-{
-    this->send_message(":SYST:ERR?");
-    const std::string error = this->receive_message();
-
-    std::istringstream err_stream(error);
-    int code = 0;
-
-    if (std::getline(err_stream, errmsg, ',')) {
-        code = std::stoi(errmsg);
-
-        if (std::getline(err_stream, errmsg)) {
-            errmsg.erase(0, errmsg.find_first_not_of(" \t\n\r"));
-        }
-    }
-
-    return code;
-}
-
 void TCPConn::handshake()
 {
     std::cout << "Handshaking with device\n";
 
-    this->send_message(":SYST:LANG?");
-    const std::string system_language = this->receive_message();
+    this->send_message_(":SYST:LANG?");
+    const std::string system_language = this->receive_message_();
 
     std::string errmsg;
-    if (this->check_for_error(errmsg) < 0) {
+    if (this->check_for_error_(errmsg) < 0) {
         throw std::runtime_error(errmsg);
     }
 
@@ -142,18 +133,14 @@ void TCPConn::handshake()
 void TCPConn::run()
 {
     std::cout << "Pressing RUN button\n";
-    this->send_message(":RUN");
+    this->send_message_(":RUN");
 }
 
 void TCPConn::stop()
 {
     std::cout << "Pressing STOP button\n";
-    this->send_message(":STOP");
+    this->send_message_(":STOP");
 }
-
-} // namespace
-
-namespace client {
 
 void send_message(const parameters::Parameters &params)
 {
