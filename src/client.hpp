@@ -22,6 +22,7 @@ private:
     void send_message_(const std::string &message);
 
     int client_fd_;
+    bool is_connected_ = false;
 };
 
 } // namespace client

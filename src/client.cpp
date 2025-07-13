@@ -18,6 +18,10 @@ namespace client {
 
 void TCPConn::send_message_(const std::string &message)
 {
+    if (not this->is_connected_) {
+        throw std::logic_error("Cannot send message. Socket file descriptor is not connected to any address");
+    }
+
     if (message.empty()) {
         throw std::runtime_error("Cannot send empty message");
     }
@@ -37,6 +41,10 @@ void TCPConn::send_message_(const std::string &message)
 
 std::string TCPConn::receive_message_()
 {
+    if (not this->is_connected_) {
+        throw std::logic_error("Cannot receive message. Socket file descriptor is not connected to any address");
+    }
+
     char buffer[1024];
     int bytes_received = recv(this->client_fd_, buffer, sizeof(buffer) - 1, 0);
 
@@ -93,6 +101,8 @@ TCPConn::~TCPConn()
     if (this->client_fd_ != -1) {
         close(this->client_fd_);
     }
+
+    this->is_connected_ = false;
 }
 
 void TCPConn::establish_connection(const std::string &host, int port)
@@ -113,6 +123,8 @@ void TCPConn::establish_connection(const std::string &host, int port)
         close(this->client_fd_);
         throw std::runtime_error("Connection failed");
     }
+
+    this->is_connected_ = true;
 }
 
 void TCPConn::handshake()
