@@ -21,3 +21,6 @@ add_executable(
   parameters.cpp
   workflows.cpp
 )
+
+set(CMAKE_INSTALL_PREFIX "$ENV{HOME}/.local")
+install(TARGETS scope DESTINATION bin)
