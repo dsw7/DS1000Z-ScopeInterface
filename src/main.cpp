@@ -21,8 +21,9 @@ Options:
   -h, --help           Print help information and exit
   -v, --verbose        Enable additional verbosity for debugging purposes
   -p, --port           Oscilloscope port (default is 5555)
-  -t, --timebase       Set timebase scale (seconds per horizontal division)
+  -t, --timebase       Set horizontal scale (seconds / horizontal division)
   -l, --trigger-level  Set trigger level (in volts)
+  -s, --scale          Set vertical scale (volts / vertical division)
 )";
 
     std::cout << "-- DS1000Z-ScopeInterface | v" << PROJECT_VERSION << '\n';
@@ -40,11 +41,12 @@ int main(int argc, char **argv)
             { "port", required_argument, 0, 'p' },
             { "timebase", required_argument, 0, 't' },
             { "trigger-level", required_argument, 0, 'l' },
+            { "scale", required_argument, 0, 's' },
             { 0, 0, 0, 0 },
         };
 
         int option_index = 0;
-        int c = getopt_long(argc, argv, "hvp:t:l:", long_options, &option_index);
+        int c = getopt_long(argc, argv, "hvp:t:l:s:", long_options, &option_index);
 
         if (c == -1) {
             break;
@@ -65,6 +67,9 @@ int main(int argc, char **argv)
                 break;
             case 'l':
                 params.trigger_level_s = optarg;
+                break;
+            case 's':
+                params.volts_per_div_s = optarg;
                 break;
             default:
                 print_help_messages();
