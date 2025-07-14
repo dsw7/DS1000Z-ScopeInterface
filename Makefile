@@ -1,4 +1,4 @@
-.PHONY = format compile clean lint
+.PHONY = format compile tidy clean lint
 .DEFAULT_GOAL = compile
 
 BUILD_DIR = build
@@ -9,6 +9,10 @@ format:
 compile: format
 	@cmake -S src -B $(BUILD_DIR)
 	@make --jobs=12 --directory=$(BUILD_DIR) install
+
+tidy:
+	@cmake -S src -B $(BUILD_DIR)
+	@clang-tidy -p $(BUILD_DIR) src/*.cpp src/*.hpp
 
 clean:
 	@rm -rfv $(BUILD_DIR)
