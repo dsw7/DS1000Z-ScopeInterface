@@ -182,18 +182,17 @@ void TCPConn::single()
     this->check_for_error_();
 }
 
-void TCPConn::set_timebase(float sec)
+void TCPConn::set_timebase(float secs_per_div)
 {
-    if (sec < 0) {
+    if (secs_per_div < 0) {
         throw std::invalid_argument("Timebase must be greater than 0 seconds");
     }
 
-    if (sec > 50) {
+    if (secs_per_div > 50) {
         throw std::invalid_argument("Timebase cannot exceed 50 seconds");
     }
 
-    std::cout << "Setting timebase scale to " << sec << " seconds / division\n";
-    this->send_message_(":TIM:MAIN:SCAL " + std::to_string(sec));
+    this->send_message_(":TIM:MAIN:SCAL " + std::to_string(secs_per_div));
     this->check_for_error_();
 }
 

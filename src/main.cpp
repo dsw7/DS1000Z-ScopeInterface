@@ -21,7 +21,7 @@ Options:
   -h, --help           Print help information and exit
   -v, --verbose        Enable additional verbosity for debugging purposes
   -p, --port           Oscilloscope port (default is 5555)
-  -t, --timebase       Set timebase scale (units in seconds)
+  -t, --timebase       Set timebase scale (seconds per horizontal division)
   -l, --trigger-level  Set trigger level (in volts)
 )";
 
@@ -61,7 +61,7 @@ int main(int argc, char **argv)
                 params.port_s = optarg;
                 break;
             case 't':
-                params.timebase_s = optarg;
+                params.secs_per_div_s = optarg;
                 break;
             case 'l':
                 params.trigger_level_s = optarg;

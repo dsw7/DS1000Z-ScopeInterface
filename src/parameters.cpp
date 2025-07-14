@@ -16,7 +16,7 @@ void Parameters::port_s_to_port_()
 void Parameters::timebase_s_to_timebase_()
 {
     try {
-        this->timebase = std::stof(this->timebase_s);
+        this->secs_per_div = std::stof(this->secs_per_div_s);
     } catch (const std::invalid_argument &e) {
         throw std::runtime_error("Failed to convert timebase to floating point value: " + (std::string)e.what());
     }
