@@ -19,7 +19,7 @@ Usage:
 
 Options:
   -h, --help      Print help information and exit
-  -t, --timebase  Set timebase scale
+  -t, --timebase  Set timebase scale (units in seconds)
   -p, --port      Oscilloscope port (default is 5555)
 )";
 
