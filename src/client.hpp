@@ -17,7 +17,7 @@ public:
     void set_timebase(float sec);
 
 private:
-    int check_for_error_(std::string &errmsg);
+    void check_for_error_();
     std::string receive_message_();
     void send_message_(const std::string &message);
 

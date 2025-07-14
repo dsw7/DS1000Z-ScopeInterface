@@ -64,13 +64,14 @@ std::string TCPConn::receive_message_()
     return message;
 }
 
-int TCPConn::check_for_error_(std::string &errmsg)
+void TCPConn::check_for_error_()
 {
     this->send_message_(":SYST:ERR?");
     const std::string error = this->receive_message_();
 
     std::istringstream err_stream(error);
     int code = 0;
+    std::string errmsg;
 
     if (std::getline(err_stream, errmsg, ',')) {
         code = std::stoi(errmsg);
@@ -80,7 +81,9 @@ int TCPConn::check_for_error_(std::string &errmsg)
         }
     }
 
-    return code;
+    if (code != 0) {
+        throw std::runtime_error(errmsg);
+    }
 }
 
 // ----------------------------------------------------------------------------------------------------------
@@ -133,11 +136,7 @@ void TCPConn::handshake()
     this->send_message_(":SYST:LANG?");
     const std::string system_language = this->receive_message_();
 
-    std::string errmsg;
-    if (this->check_for_error_(errmsg) < 0) {
-        throw std::runtime_error(errmsg);
-    }
-
+    this->check_for_error_();
     std::cout << "Connection successful. Resolved system language: " << system_language << '\n';
 }
 
@@ -172,11 +171,7 @@ void TCPConn::set_timebase(float sec)
     std::cout << "Setting timebase scale to " << sec << " seconds / division\n";
     this->send_message_(":TIM:MAIN:SCAL " + std::to_string(sec));
 
-    std::string errmsg;
-    if (this->check_for_error_(errmsg) < 0) {
-        throw std::runtime_error(errmsg);
-    }
-    std::cout << errmsg << '\n';
+    this->check_for_error_();
 }
 
 } // namespace client
