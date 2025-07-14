@@ -184,29 +184,12 @@ void TCPConn::single()
 
 void TCPConn::set_timebase(float secs_per_div)
 {
-    if (secs_per_div < 0) {
-        throw std::invalid_argument("Timebase must be greater than 0 seconds");
-    }
-
-    if (secs_per_div > 50) {
-        throw std::invalid_argument("Timebase cannot exceed 50 seconds");
-    }
-
     this->send_message_(":TIM:MAIN:SCAL " + std::to_string(secs_per_div));
     this->check_for_error_();
 }
 
 void TCPConn::set_rising_edge_trigger(float level)
 {
-    if (level < -5.00) {
-        throw std::invalid_argument("Trigger level cannot be less than -5.00V");
-    }
-
-    if (level > 5.00) {
-        throw std::invalid_argument("Trigger level cannot exceed 5.00V");
-    }
-
-    std::cout << "Setting rising edge trigger on CH1 with trigger set at " << level << "V\n";
     this->send_message_(":TRIG:MODE EDGE");
     this->check_for_error_();
 
@@ -222,14 +205,6 @@ void TCPConn::set_rising_edge_trigger(float level)
 
 void TCPConn::set_channel_scale(float volts_per_div)
 {
-    if (volts_per_div < -0.01) {
-        throw std::invalid_argument("Vertical scale cannot be less than 0.01V");
-    }
-
-    if (volts_per_div > 100) {
-        throw std::invalid_argument("Vertical scale cannot exceed 100V");
-    }
-
     this->send_message_(":CHAN1:SCAL " + std::to_string(volts_per_div));
     this->check_for_error_();
 }
