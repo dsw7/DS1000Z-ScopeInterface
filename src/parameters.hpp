@@ -9,6 +9,7 @@ struct Parameters {
     bool enable_verbosity = false;
     float secs_per_div = 0.0005;
     float trigger_level = 1.00;
+    float vertical_offset = 0.00;
     float volts_per_div = 1.00;
     int port = 5555;
 
@@ -18,6 +19,7 @@ struct Parameters {
     void set_timebase(const std::string &secs_per_div);
     void set_trigger_level(const std::string &trigger_level);
     void set_scale(const std::string &volts_per_div);
+    void set_vertical_offset(const std::string &vertical_offset);
 };
 
 } // namespace parameters

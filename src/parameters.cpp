@@ -64,4 +64,21 @@ void Parameters::set_scale(const std::string &volts_per_div)
     }
 }
 
+void Parameters::set_vertical_offset(const std::string &vertical_offset)
+{
+    try {
+        this->vertical_offset = std::stof(vertical_offset);
+    } catch (const std::invalid_argument &e) {
+        throw std::invalid_argument("Failed to convert verticla offset to floating point value: " + (std::string)e.what());
+    }
+
+    if (this->vertical_offset < -20.00) {
+        throw std::invalid_argument("Vertical offset cannot be less than -20.00V");
+    }
+
+    if (this->vertical_offset > 20.00) {
+        throw std::invalid_argument("Vertical offset cannot be greater than 20.00V");
+    }
+}
+
 } // namespace parameters

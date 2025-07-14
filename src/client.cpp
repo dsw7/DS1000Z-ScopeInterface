@@ -232,4 +232,10 @@ float TCPConn::get_channel_scale()
     return volts_per_div;
 }
 
+void TCPConn::set_channel_vertical_position(float offset_in_volts)
+{
+    this->send_message_(":CHAN1:OFFS " + std::to_string(offset_in_volts));
+    this->check_for_error_();
+}
+
 } // namespace client

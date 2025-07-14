@@ -13,6 +13,7 @@ void example(const parameters::Parameters &params)
     tcp_conn.set_timebase(params.secs_per_div);
     tcp_conn.set_channel_scale(params.volts_per_div);
     tcp_conn.set_rising_edge_trigger(params.trigger_level);
+    tcp_conn.set_channel_vertical_position(params.vertical_offset);
     tcp_conn.run();
 }
 
