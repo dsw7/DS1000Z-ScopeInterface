@@ -154,6 +154,13 @@ void TCPConn::handshake()
     std::cout << "Connection successful. Resolved system language: " << system_language << '\n';
 }
 
+void TCPConn::clear()
+{
+    std::cout << "Pressing CLEAR button\n";
+    this->send_message_(":CLE");
+    this->check_for_error_();
+}
+
 void TCPConn::run()
 {
     std::cout << "Pressing RUN button\n";
@@ -187,6 +194,27 @@ void TCPConn::set_timebase(float sec)
 
     std::cout << "Setting timebase scale to " << sec << " seconds / division\n";
     this->send_message_(":TIM:MAIN:SCAL " + std::to_string(sec));
+    this->check_for_error_();
+}
+
+void TCPConn::set_rising_edge_trigger(float level)
+{
+    if (level < -5.00) {
+        throw std::invalid_argument("Trigger level cannot be less than -5.00V");
+    }
+
+    if (level > 5.00) {
+        throw std::invalid_argument("Trigger level cannot exceed 5.00V");
+    }
+
+    std::cout << "Setting rising edge trigger with trigger set at " << level << "V\n";
+    this->send_message_(":TRIG:MODE EDGE");
+    this->check_for_error_();
+
+    this->send_message_(":TRIG:EDG:SLOP POS");
+    this->check_for_error_();
+
+    this->send_message_(":TRIG:EDG:LEV " + std::to_string(level));
     this->check_for_error_();
 }
 

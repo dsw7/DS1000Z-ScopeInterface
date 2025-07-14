@@ -11,10 +11,12 @@ public:
 
     void establish_connection(const std::string &host, int port);
     void handshake();
+    void clear();
     void run();
     void stop();
     void single();
     void set_timebase(float sec);
+    void set_rising_edge_trigger(float level);
 
 private:
     void check_for_error_();

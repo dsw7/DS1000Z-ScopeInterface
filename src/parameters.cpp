@@ -22,10 +22,20 @@ void Parameters::timebase_s_to_timebase_()
     }
 }
 
+void Parameters::trigger_level_s_to_trigger_level_()
+{
+    try {
+        this->trigger_level = std::stof(this->trigger_level_s);
+    } catch (const std::invalid_argument &e) {
+        throw std::runtime_error("Failed to convert trigger level to floating point value: " + (std::string)e.what());
+    }
+}
+
 void Parameters::run_conversions()
 {
     this->port_s_to_port_();
     this->timebase_s_to_timebase_();
+    this->trigger_level_s_to_trigger_level_();
 }
 
 } // namespace parameters

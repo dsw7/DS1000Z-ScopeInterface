@@ -18,10 +18,11 @@ Usage:
   scope [OPTION]... HOST
 
 Options:
-  -h, --help      Print help information and exit
-  -t, --timebase  Set timebase scale (units in seconds)
-  -p, --port      Oscilloscope port (default is 5555)
-  -v, --verbose   Enable additional verbosity for debugging purposes
+  -h, --help           Print help information and exit
+  -v, --verbose        Enable additional verbosity for debugging purposes
+  -p, --port           Oscilloscope port (default is 5555)
+  -t, --timebase       Set timebase scale (units in seconds)
+  -l, --trigger-level  Set trigger level (in volts)
 )";
 
     std::cout << "-- DS1000Z-ScopeInterface | v" << PROJECT_VERSION << '\n';
@@ -36,13 +37,14 @@ int main(int argc, char **argv)
         static struct option long_options[] = {
             { "help", no_argument, 0, 'h' },
             { "verbose", no_argument, 0, 'v' },
-            { "timebase", required_argument, 0, 't' },
             { "port", required_argument, 0, 'p' },
+            { "timebase", required_argument, 0, 't' },
+            { "trigger-level", required_argument, 0, 'l' },
             { 0, 0, 0, 0 },
         };
 
         int option_index = 0;
-        int c = getopt_long(argc, argv, "hvt:p:", long_options, &option_index);
+        int c = getopt_long(argc, argv, "hvp:t:l:", long_options, &option_index);
 
         if (c == -1) {
             break;
@@ -55,11 +57,14 @@ int main(int argc, char **argv)
             case 'v':
                 params.enable_verbosity = true;
                 break;
+            case 'p':
+                params.port_s = optarg;
+                break;
             case 't':
                 params.timebase_s = optarg;
                 break;
-            case 'p':
-                params.port_s = optarg;
+            case 'l':
+                params.trigger_level_s = optarg;
                 break;
             default:
                 print_help_messages();
