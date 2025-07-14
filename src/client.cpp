@@ -221,4 +221,18 @@ void TCPConn::set_rising_edge_trigger(float level)
     this->check_for_error_();
 }
 
+void TCPConn::set_channel_scale(float volts_per_div)
+{
+    if (volts_per_div < -0.01) {
+        throw std::invalid_argument("Vertical scale cannot be less than 0.01V");
+    }
+
+    if (volts_per_div > 100) {
+        throw std::invalid_argument("Vertical scale cannot exceed 100V");
+    }
+
+    this->send_message_(":CHAN1:SCAL " + std::to_string(volts_per_div));
+    this->check_for_error_();
+}
+
 } // namespace client

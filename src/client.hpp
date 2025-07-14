@@ -17,6 +17,7 @@ public:
     void single();
     void set_timebase(float sec);
     void set_rising_edge_trigger(float level);
+    void set_channel_scale(float volts_per_div);
 
 private:
     void check_for_error_();
