@@ -190,6 +190,19 @@ void TCPConn::set_timebase(float secs_per_div)
 
 void TCPConn::set_rising_edge_trigger(float level)
 {
+    float volts_per_div = this->get_channel_scale();
+    float upper_limit = volts_per_div * 4;
+    float lower_limit = -1 * upper_limit;
+
+    if (level < lower_limit or level > upper_limit) {
+        // I/O between machine and scope will crash if we try to set trigger outside of limits
+        std::cerr << "The vertical limits are " << lower_limit << "V and +" << upper_limit << "V\n";
+        throw std::invalid_argument("Trigger level falls outside of limits");
+    }
+
+    this->send_message_(":TRIG:EDG:LEV " + std::to_string(level));
+    this->check_for_error_();
+
     this->send_message_(":TRIG:MODE EDGE");
     this->check_for_error_();
 
@@ -197,9 +210,6 @@ void TCPConn::set_rising_edge_trigger(float level)
     this->check_for_error_();
 
     this->send_message_(":TRIG:EDG:SLOP POS");
-    this->check_for_error_();
-
-    this->send_message_(":TRIG:EDG:LEV " + std::to_string(level));
     this->check_for_error_();
 }
 
