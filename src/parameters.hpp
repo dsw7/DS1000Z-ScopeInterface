@@ -7,8 +7,8 @@ namespace parameters {
 
 struct Parameters {
     bool enable_verbosity = false;
-    float secs_per_div = 0.005;
-    float trigger_level = 2.00;
+    float secs_per_div = 0.0005;
+    float trigger_level = 1.00;
     float volts_per_div = 1.00;
     int port = 5555;
 
