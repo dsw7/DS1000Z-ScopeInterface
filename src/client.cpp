@@ -107,8 +107,7 @@ TCPConn::~TCPConn()
 
 void TCPConn::establish_connection(const std::string &host, int port)
 {
-    std::cout << "Attempting to connect to host: " << host << '\n';
-    std::cout << "On port: " << port << '\n';
+    std::cout << "Attempting to connect to " << host << ":" << port << '\n';
 
     struct sockaddr_in server_address;
     memset(&server_address, 0, sizeof(server_address));
@@ -163,11 +162,21 @@ void TCPConn::single()
 void TCPConn::set_timebase(float sec)
 {
     if (sec < 0) {
-        throw std::invalid_argument("Seconds must be greater than 0");
+        throw std::invalid_argument("Timebase must be greater than 0 seconds");
+    }
+
+    if (sec > 50) {
+        throw std::invalid_argument("Timebase cannot exceed 50 seconds");
     }
 
     std::cout << "Setting timebase scale to " << sec << " seconds / division\n";
     this->send_message_(":TIM:MAIN:SCAL " + std::to_string(sec));
+
+    std::string errmsg;
+    if (this->check_for_error_(errmsg) < 0) {
+        throw std::runtime_error(errmsg);
+    }
+    std::cout << errmsg << '\n';
 }
 
 } // namespace client

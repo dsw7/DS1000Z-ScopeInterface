@@ -74,12 +74,23 @@ int main(int argc, char **argv)
         return 1;
     }
 
+    bool failed = false;
+    std::string errmsg;
+
     try {
         params.run_conversions();
         workflows::example(params);
     } catch (const std::runtime_error &e) {
-        std::cerr << "An error occurred: " << e.what() << '\n';
-        exit(EXIT_FAILURE);
+        failed = true;
+        errmsg = e.what();
+    } catch (const std::invalid_argument &e) {
+        failed = true;
+        errmsg = e.what();
+    }
+
+    if (failed) {
+        std::cerr << "An error occurred: " << errmsg << '\n';
+        return 1;
     }
 
     return 0;
