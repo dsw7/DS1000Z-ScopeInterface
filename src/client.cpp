@@ -145,12 +145,15 @@ void TCPConn::establish_connection(const std::string &host, int port)
 
 void TCPConn::handshake()
 {
-    this->send_message_(":SYST:GAM?");
-    const std::string num_grids = this->receive_message_();
+    this->send_message_("*IDN?");
+    std::cout << "Connected to instrument: " << this->receive_message_() << '\n';
     this->check_for_error_();
 
+    this->send_message_(":SYST:GAM?");
+    const std::string num_grids = this->receive_message_();
+
     if (num_grids != "12") {
-        throw std::runtime_error("Handshake failed. Query should always return 12");
+        throw std::runtime_error("Query should always return 12. I don't know what to do...");
     }
 }
 
