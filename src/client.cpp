@@ -37,6 +37,11 @@ void TCPConn::send_message_(const std::string &message)
     if (bytes_sent == -1) {
         throw std::runtime_error(std::strerror(errno));
     }
+
+    if (this->verbose_) {
+        std::cout << "DEBUG> Send message: " << message_;
+        std::cout << "DEBUG> Bytes sent: " << bytes_sent << '\n';
+    }
 }
 
 std::string TCPConn::receive_message_()
@@ -59,6 +64,11 @@ std::string TCPConn::receive_message_()
         if (message.back() == '\n') {
             message.pop_back();
         }
+    }
+
+    if (this->verbose_) {
+        std::cout << "DEBUG> Received message: " << message << '\n';
+        std::cout << "DEBUG> Bytes received: " << bytes_received << '\n';
     }
 
     return message;
@@ -90,8 +100,12 @@ void TCPConn::check_for_error_()
 // public
 // ----------------------------------------------------------------------------------------------------------
 
-TCPConn::TCPConn()
+TCPConn::TCPConn(bool verbose)
 {
+    if (verbose) {
+        this->verbose_ = true;
+    }
+
     this->client_fd_ = socket(AF_INET, SOCK_STREAM, 0);
 
     if (this->client_fd_ == -1) {

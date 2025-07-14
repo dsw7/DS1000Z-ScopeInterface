@@ -21,6 +21,7 @@ Options:
   -h, --help      Print help information and exit
   -t, --timebase  Set timebase scale (units in seconds)
   -p, --port      Oscilloscope port (default is 5555)
+  -v, --verbose   Enable additional verbosity for debugging purposes
 )";
 
     std::cout << "-- DS1000Z-ScopeInterface | v" << PROJECT_VERSION << '\n';
@@ -34,13 +35,14 @@ int main(int argc, char **argv)
     while (true) {
         static struct option long_options[] = {
             { "help", no_argument, 0, 'h' },
-            { "timebase", no_argument, 0, 't' },
-            { "port", no_argument, 0, 'p' },
+            { "verbose", no_argument, 0, 'v' },
+            { "timebase", required_argument, 0, 't' },
+            { "port", required_argument, 0, 'p' },
             { 0, 0, 0, 0 },
         };
 
         int option_index = 0;
-        int c = getopt_long(argc, argv, "ht:p:", long_options, &option_index);
+        int c = getopt_long(argc, argv, "hvt:p:", long_options, &option_index);
 
         if (c == -1) {
             break;
@@ -50,6 +52,9 @@ int main(int argc, char **argv)
             case 'h':
                 print_help_messages();
                 exit(EXIT_SUCCESS);
+            case 'v':
+                params.enable_verbosity = true;
+                break;
             case 't':
                 params.timebase_s = optarg;
                 break;

@@ -6,7 +6,7 @@ namespace client {
 
 class TCPConn {
 public:
-    TCPConn();
+    TCPConn(bool verbose = false);
     ~TCPConn();
 
     void establish_connection(const std::string &host, int port);
@@ -21,8 +21,9 @@ private:
     std::string receive_message_();
     void send_message_(const std::string &message);
 
-    int client_fd_;
     bool is_connected_ = false;
+    bool verbose_ = false;
+    int client_fd_;
 };
 
 } // namespace client

@@ -7,6 +7,7 @@ namespace parameters {
 
 class Parameters {
 public:
+    bool enable_verbosity = false;
     float timebase = 0.005;
     int port = 5555;
     std::optional<std::string> host;
