@@ -3,7 +3,7 @@
 #include <arpa/inet.h>
 #include <cerrno>
 #include <cstring>
-#include <iostream>
+#include <fmt/core.h>
 #include <sstream>
 #include <stdexcept>
 #include <string.h>
@@ -39,8 +39,7 @@ void TCPConn::send_message_(const std::string &message)
     }
 
     if (this->verbose_) {
-        std::cout << "DEBUG> Send message: " << message_;
-        std::cout << "DEBUG> Bytes sent: " << bytes_sent << '\n';
+        fmt::print("Sent message: {} ({} bytes)\n", message_, bytes_sent);
     }
 }
 
@@ -67,8 +66,7 @@ std::string TCPConn::receive_message_()
     }
 
     if (this->verbose_) {
-        std::cout << "DEBUG> Received message: " << message << '\n';
-        std::cout << "DEBUG> Bytes received: " << bytes_received << '\n';
+        fmt::print("Received message: {} ({} bytes)\n", message, bytes_received);
     }
 
     return message;
@@ -124,7 +122,7 @@ TCPConn::~TCPConn()
 
 void TCPConn::establish_connection(const std::string &host, int port)
 {
-    std::cout << "Attempting to connect to " << host << ":" << port << '\n';
+    fmt::print("Attempting to connect to {}:{}\n", host, port);
 
     struct sockaddr_in server_address;
     memset(&server_address, 0, sizeof(server_address));
@@ -146,7 +144,7 @@ void TCPConn::establish_connection(const std::string &host, int port)
 void TCPConn::handshake()
 {
     this->send_message_("*IDN?");
-    std::cout << "Connected to instrument: " << this->receive_message_() << '\n';
+    fmt::print("Connected to instrument: {}\n", this->receive_message_());
     this->check_for_error_();
 }
 
@@ -188,8 +186,8 @@ void TCPConn::set_rising_edge_trigger(float level)
 
     if (level < lower_limit or level > upper_limit) {
         // I/O between machine and scope will crash if we try to set trigger outside of limits
-        std::cerr << "The vertical limits are " << lower_limit << "V and +" << upper_limit << "V\n";
-        throw std::invalid_argument("Trigger level falls outside of limits");
+        const std::string errmsg = fmt::format("Trigger outside limits. The vertical limits are {}V and +{}V", lower_limit, upper_limit);
+        throw std::invalid_argument(errmsg);
     }
 
     this->send_message_(":TRIG:MODE EDGE");

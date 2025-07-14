@@ -17,5 +17,8 @@ add_executable(
   workflows.cpp
 )
 
+find_package(fmt REQUIRED)
+target_link_libraries(scope fmt::fmt) 
+
 set(CMAKE_INSTALL_PREFIX "$ENV{HOME}/.local")
 install(TARGETS scope DESTINATION bin)

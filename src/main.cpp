@@ -2,6 +2,7 @@
 #include "workflows.hpp"
 
 #include <cstring>
+#include <fmt/core.h>
 #include <getopt.h>
 #include <iostream>
 #include <stdexcept>
@@ -27,8 +28,8 @@ Options:
   -y, --vertical-offset  Set channel vertical position (in volts)
 )";
 
-    std::cout << "-- DS1000Z-ScopeInterface | v" << PROJECT_VERSION << '\n';
-    std::cout << messages << '\n';
+    fmt::print("-- DS1000Z-ScopeInterface | v{}\n", PROJECT_VERSION);
+    fmt::print("{}\n", messages);
 }
 
 parameters::Parameters read_cli(int argc, char **argv)
@@ -99,7 +100,7 @@ int main(int argc, char **argv)
     try {
         params = read_cli(argc, argv);
     } catch (const std::invalid_argument &e) {
-        std::cerr << e.what() << '\n';
+        std::cerr << fmt::format("{}\n", e.what());
         return 1;
     }
 
@@ -122,7 +123,7 @@ int main(int argc, char **argv)
     }
 
     if (failed) {
-        std::cerr << "An error occurred: " << errmsg << '\n';
+        std::cerr << fmt::format("An error occurred: {}\n", errmsg);
         return 1;
     }
 

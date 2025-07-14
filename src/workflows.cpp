@@ -2,13 +2,14 @@
 
 #include "client.hpp"
 
-#include <iostream>
+#include <fmt/core.h>
 
 namespace workflows {
 
 void example(const parameters::Parameters &params)
 {
-    std::cout << "Connecting to device\n";
+    fmt::print("Connecting to device\n");
+
     client::TCPConn tcp_conn(params.enable_verbosity);
     tcp_conn.establish_connection(params.host.value(), params.port);
     tcp_conn.handshake();
@@ -19,7 +20,7 @@ void example(const parameters::Parameters &params)
     tcp_conn.set_channel_vertical_position(params.vertical_offset);
     tcp_conn.run();
 
-    std::cout << "Disconnecting from device\n";
+    fmt::print("Disconnecting from device\n");
 }
 
 } // namespace workflows
