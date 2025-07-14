@@ -209,4 +209,21 @@ void TCPConn::set_channel_scale(float volts_per_div)
     this->check_for_error_();
 }
 
+float TCPConn::get_channel_scale()
+{
+    this->send_message_(":CHAN1:SCAL?");
+    const std::string scale = this->receive_message_();
+    this->check_for_error_();
+
+    float volts_per_div = 0;
+
+    try {
+        volts_per_div = std::stof(scale);
+    } catch (const std::invalid_argument &e) {
+        throw std::runtime_error(e.what());
+    }
+
+    return volts_per_div;
+}
+
 } // namespace client
