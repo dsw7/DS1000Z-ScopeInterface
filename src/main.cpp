@@ -24,7 +24,7 @@ Options:
   -t, --timebase         Set horizontal scale (seconds / horizontal division)
   -l, --trigger-level    Set trigger level (in volts)
   -s, --scale            Set vertical scale (volts / vertical division)
-  -y, --vertical-offset  Set vertical scale (volts / vertical division)
+  -y, --vertical-offset  Set channel vertical position (in volts)
 )";
 
     std::cout << "-- DS1000Z-ScopeInterface | v" << PROJECT_VERSION << '\n';

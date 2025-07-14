@@ -148,13 +148,6 @@ void TCPConn::handshake()
     this->send_message_("*IDN?");
     std::cout << "Connected to instrument: " << this->receive_message_() << '\n';
     this->check_for_error_();
-
-    this->send_message_(":SYST:GAM?");
-    const std::string num_grids = this->receive_message_();
-
-    if (num_grids != "12") {
-        throw std::runtime_error("Query should always return 12. I don't know what to do...");
-    }
 }
 
 void TCPConn::clear()
@@ -199,10 +192,10 @@ void TCPConn::set_rising_edge_trigger(float level)
         throw std::invalid_argument("Trigger level falls outside of limits");
     }
 
-    this->send_message_(":TRIG:EDG:LEV " + std::to_string(level));
+    this->send_message_(":TRIG:MODE EDGE");
     this->check_for_error_();
 
-    this->send_message_(":TRIG:MODE EDGE");
+    this->send_message_(":TRIG:EDG:LEV " + std::to_string(level));
     this->check_for_error_();
 
     this->send_message_(":TRIG:EDG:SOUR CHAN1");
