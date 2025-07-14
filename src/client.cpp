@@ -158,18 +158,21 @@ void TCPConn::run()
 {
     std::cout << "Pressing RUN button\n";
     this->send_message_(":RUN");
+    this->check_for_error_();
 }
 
 void TCPConn::stop()
 {
     std::cout << "Pressing STOP button\n";
     this->send_message_(":STOP");
+    this->check_for_error_();
 }
 
 void TCPConn::single()
 {
     std::cout << "Pressing SINGLE button\n";
     this->send_message_(":SING");
+    this->check_for_error_();
 }
 
 void TCPConn::set_timebase(float sec)
@@ -184,7 +187,6 @@ void TCPConn::set_timebase(float sec)
 
     std::cout << "Setting timebase scale to " << sec << " seconds / division\n";
     this->send_message_(":TIM:MAIN:SCAL " + std::to_string(sec));
-
     this->check_for_error_();
 }
 
