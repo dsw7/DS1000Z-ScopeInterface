@@ -30,7 +30,7 @@ Options:
     std::cout << messages << '\n';
 }
 
-int main(int argc, char **argv)
+parameters::Parameters read_cli(int argc, char **argv)
 {
     parameters::Parameters params;
 
@@ -60,16 +60,16 @@ int main(int argc, char **argv)
                 params.enable_verbosity = true;
                 break;
             case 'p':
-                params.port_s = optarg;
+                params.set_port(optarg);
                 break;
             case 't':
-                params.secs_per_div_s = optarg;
+                params.set_timebase(optarg);
                 break;
             case 'l':
-                params.trigger_level_s = optarg;
+                params.set_trigger_level(optarg);
                 break;
             case 's':
-                params.volts_per_div_s = optarg;
+                params.set_scale(optarg);
                 break;
             default:
                 print_help_messages();
@@ -84,6 +84,20 @@ int main(int argc, char **argv)
         }
     }
 
+    return params;
+}
+
+int main(int argc, char **argv)
+{
+    parameters::Parameters params;
+
+    try {
+        params = read_cli(argc, argv);
+    } catch (const std::invalid_argument &e) {
+        std::cerr << e.what() << '\n';
+        return 1;
+    }
+
     if (not params.host) {
         std::cerr << "Host argument is not set!\n";
         return 1;
@@ -93,7 +107,6 @@ int main(int argc, char **argv)
     std::string errmsg;
 
     try {
-        params.run_conversions();
         workflows::example(params);
     } catch (const std::runtime_error &e) {
         failed = true;

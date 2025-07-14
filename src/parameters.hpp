@@ -5,25 +5,19 @@
 
 namespace parameters {
 
-class Parameters {
-public:
+struct Parameters {
     bool enable_verbosity = false;
     float secs_per_div = 0.005;
     float trigger_level = 2.00;
     float volts_per_div = 1.00;
     int port = 5555;
+
     std::optional<std::string> host;
-    std::string port_s = "5555";
-    std::string secs_per_div_s = "0.005";
-    std::string trigger_level_s = "2.00";
-    std::string volts_per_div_s = "1.00";
 
-    void run_conversions();
-
-private:
-    void port_s_to_port_();
-    void timebase_s_to_timebase_();
-    void trigger_level_s_to_trigger_level_();
+    void set_port(const std::string &port);
+    void set_timebase(const std::string &secs_per_div);
+    void set_trigger_level(const std::string &trigger_level);
+    void set_scale(const std::string &volts_per_div);
 };
 
 } // namespace parameters

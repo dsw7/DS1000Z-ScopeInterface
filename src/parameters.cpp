@@ -4,38 +4,40 @@
 
 namespace parameters {
 
-void Parameters::port_s_to_port_()
+void Parameters::set_port(const std::string &port)
 {
     try {
-        this->port = std::stoi(this->port_s);
+        this->port = std::stoi(port);
     } catch (const std::invalid_argument &e) {
-        throw std::runtime_error("Failed to convert port to integer value: " + (std::string)e.what());
+        throw std::invalid_argument("Failed to convert port to integer value: " + (std::string)e.what());
     }
 }
 
-void Parameters::timebase_s_to_timebase_()
+void Parameters::set_timebase(const std::string &secs_per_div)
 {
     try {
-        this->secs_per_div = std::stof(this->secs_per_div_s);
+        this->secs_per_div = std::stof(secs_per_div);
     } catch (const std::invalid_argument &e) {
-        throw std::runtime_error("Failed to convert timebase to floating point value: " + (std::string)e.what());
+        throw std::invalid_argument("Failed to convert timebase to floating point value: " + (std::string)e.what());
     }
 }
 
-void Parameters::trigger_level_s_to_trigger_level_()
+void Parameters::set_trigger_level(const std::string &trigger_level)
 {
     try {
-        this->trigger_level = std::stof(this->trigger_level_s);
+        this->trigger_level = std::stof(trigger_level);
     } catch (const std::invalid_argument &e) {
-        throw std::runtime_error("Failed to convert trigger level to floating point value: " + (std::string)e.what());
+        throw std::invalid_argument("Failed to convert trigger level to floating point value: " + (std::string)e.what());
     }
 }
 
-void Parameters::run_conversions()
+void Parameters::set_scale(const std::string &volts_per_div)
 {
-    this->port_s_to_port_();
-    this->timebase_s_to_timebase_();
-    this->trigger_level_s_to_trigger_level_();
+    try {
+        this->volts_per_div = std::stof(volts_per_div);
+    } catch (const std::invalid_argument &e) {
+        throw std::invalid_argument("Failed to convert scale to floating point value: " + (std::string)e.what());
+    }
 }
 
 } // namespace parameters
