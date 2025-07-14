@@ -207,8 +207,11 @@ void TCPConn::set_rising_edge_trigger(float level)
         throw std::invalid_argument("Trigger level cannot exceed 5.00V");
     }
 
-    std::cout << "Setting rising edge trigger with trigger set at " << level << "V\n";
+    std::cout << "Setting rising edge trigger on CH1 with trigger set at " << level << "V\n";
     this->send_message_(":TRIG:MODE EDGE");
+    this->check_for_error_();
+
+    this->send_message_(":TRIG:EDG:SOUR CHAN1");
     this->check_for_error_();
 
     this->send_message_(":TRIG:EDG:SLOP POS");
