@@ -145,39 +145,35 @@ void TCPConn::establish_connection(const std::string &host, int port)
 
 void TCPConn::handshake()
 {
-    std::cout << "Handshaking with device\n";
-
-    this->send_message_(":SYST:LANG?");
-    const std::string system_language = this->receive_message_();
-
+    this->send_message_(":SYST:GAM?");
+    const std::string num_grids = this->receive_message_();
     this->check_for_error_();
-    std::cout << "Connection successful. Resolved system language: " << system_language << '\n';
+
+    if (num_grids != "12") {
+        throw std::runtime_error("Handshake failed. Query should always return 12");
+    }
 }
 
 void TCPConn::clear()
 {
-    std::cout << "Pressing CLEAR button\n";
     this->send_message_(":CLE");
     this->check_for_error_();
 }
 
 void TCPConn::run()
 {
-    std::cout << "Pressing RUN button\n";
     this->send_message_(":RUN");
     this->check_for_error_();
 }
 
 void TCPConn::stop()
 {
-    std::cout << "Pressing STOP button\n";
     this->send_message_(":STOP");
     this->check_for_error_();
 }
 
 void TCPConn::single()
 {
-    std::cout << "Pressing SINGLE button\n";
     this->send_message_(":SING");
     this->check_for_error_();
 }
