@@ -1,4 +1,4 @@
-#include "client.hpp"
+#include "scope.hpp"
 
 #include <arpa/inet.h>
 #include <cerrno>
@@ -10,7 +10,7 @@
 #include <sys/socket.h>
 #include <unistd.h>
 
-namespace client {
+namespace scope {
 
 // ----------------------------------------------------------------------------------------------------------
 // private
@@ -32,7 +32,7 @@ void TCPConn::send_message_(const std::string &message)
         message_.push_back('\n');
     }
 
-    int bytes_sent = send(this->client_fd_, message_.c_str(), message_.size(), 0);
+    int bytes_sent = send(this->sockfd_, message_.c_str(), message_.size(), 0);
 
     if (bytes_sent == -1) {
         throw std::runtime_error(std::strerror(errno));
@@ -50,7 +50,7 @@ std::string TCPConn::receive_message_()
     }
 
     char buffer[1024];
-    int bytes_received = recv(this->client_fd_, buffer, sizeof(buffer) - 1, 0);
+    int bytes_received = recv(this->sockfd_, buffer, sizeof(buffer) - 1, 0);
 
     if (bytes_received == -1) {
         throw std::runtime_error(std::strerror(errno));
@@ -144,17 +144,17 @@ TCPConn::TCPConn(bool verbose)
         this->verbose_ = true;
     }
 
-    this->client_fd_ = socket(AF_INET, SOCK_STREAM, 0);
+    this->sockfd_ = socket(AF_INET, SOCK_STREAM, 0);
 
-    if (this->client_fd_ == -1) {
+    if (this->sockfd_ == -1) {
         throw std::runtime_error(std::strerror(errno));
     }
 }
 
 TCPConn::~TCPConn()
 {
-    if (this->client_fd_ != -1) {
-        close(this->client_fd_);
+    if (this->sockfd_ != -1) {
+        close(this->sockfd_);
     }
 
     this->is_connected_ = false;
@@ -173,8 +173,8 @@ void TCPConn::establish_connection(const std::string &host, int port)
         throw std::runtime_error("Invalid address or address not supported");
     }
 
-    if (connect(this->client_fd_, (struct sockaddr *)&server_address, sizeof(server_address)) == -1) {
-        close(this->client_fd_);
+    if (connect(this->sockfd_, (struct sockaddr *)&server_address, sizeof(server_address)) == -1) {
+        close(this->sockfd_);
         throw std::runtime_error("Connection failed");
     }
 
@@ -273,4 +273,4 @@ void TCPConn::set_vertical_position(float v)
     this->check_for_error_();
 }
 
-} // namespace client
+} // namespace scope

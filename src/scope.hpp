@@ -2,7 +2,7 @@
 
 #include <string>
 
-namespace client {
+namespace scope {
 
 struct HorizontalLimits {
     float t_min = 0.00;
@@ -41,7 +41,7 @@ private:
 
     bool is_connected_ = false;
     bool verbose_ = false;
-    int client_fd_;
+    int sockfd_ = 0;
 };
 
-} // namespace client
+} // namespace scope

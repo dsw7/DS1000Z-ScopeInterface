@@ -1,6 +1,6 @@
 #include "workflows.hpp"
 
-#include "client.hpp"
+#include "scope.hpp"
 
 #include <fmt/core.h>
 
@@ -10,7 +10,7 @@ void example(const parameters::Parameters &params)
 {
     fmt::print("Connecting to device\n");
 
-    client::TCPConn tcp_conn(params.enable_verbosity);
+    scope::TCPConn tcp_conn(params.enable_verbosity);
     tcp_conn.establish_connection(params.host.value(), params.port);
     tcp_conn.reset();
     tcp_conn.handshake();
