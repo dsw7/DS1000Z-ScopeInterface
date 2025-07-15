@@ -16,7 +16,7 @@ namespace scope {
 // private
 // ----------------------------------------------------------------------------------------------------------
 
-void TCPConn::send_message_(const std::string &message)
+void Scope::send_message_(const std::string &message)
 {
     if (not this->is_connected_) {
         throw std::logic_error("Cannot send message. Socket file descriptor is not connected to any address");
@@ -43,7 +43,7 @@ void TCPConn::send_message_(const std::string &message)
     }
 }
 
-std::string TCPConn::receive_message_()
+std::string Scope::receive_message_()
 {
     if (not this->is_connected_) {
         throw std::logic_error("Cannot receive message. Socket file descriptor is not connected to any address");
@@ -72,7 +72,7 @@ std::string TCPConn::receive_message_()
     return message;
 }
 
-void TCPConn::check_for_error_()
+void Scope::check_for_error_()
 {
     this->send_message_(":SYST:ERR?");
     const std::string error = this->receive_message_();
@@ -94,7 +94,7 @@ void TCPConn::check_for_error_()
     }
 }
 
-HorizontalLimits TCPConn::get_horizontal_limits_()
+HorizontalLimits Scope::get_horizontal_limits_()
 {
     this->send_message_(":TIM:MAIN:SCAL?");
     const std::string scale = this->receive_message_();
@@ -114,7 +114,7 @@ HorizontalLimits TCPConn::get_horizontal_limits_()
     return limits;
 }
 
-VerticalLimits TCPConn::get_vertical_limits_()
+VerticalLimits Scope::get_vertical_limits_()
 {
     this->send_message_(":CHAN1:SCAL?");
     const std::string scale = this->receive_message_();
@@ -138,7 +138,7 @@ VerticalLimits TCPConn::get_vertical_limits_()
 // public
 // ----------------------------------------------------------------------------------------------------------
 
-TCPConn::TCPConn(bool verbose)
+Scope::Scope(bool verbose)
 {
     if (verbose) {
         this->verbose_ = true;
@@ -151,7 +151,7 @@ TCPConn::TCPConn(bool verbose)
     }
 }
 
-TCPConn::~TCPConn()
+Scope::~Scope()
 {
     if (this->sockfd_ != -1) {
         close(this->sockfd_);
@@ -160,7 +160,7 @@ TCPConn::~TCPConn()
     this->is_connected_ = false;
 }
 
-void TCPConn::establish_connection(const std::string &host, int port)
+void Scope::establish_connection(const std::string &host, int port)
 {
     fmt::print("Attempting to connect to {}:{}\n", host, port);
 
@@ -181,50 +181,50 @@ void TCPConn::establish_connection(const std::string &host, int port)
     this->is_connected_ = true;
 }
 
-void TCPConn::reset()
+void Scope::reset()
 {
     this->send_message_("*RST");
     this->check_for_error_();
 }
 
-void TCPConn::handshake()
+void Scope::handshake()
 {
     this->send_message_("*IDN?");
     fmt::print("Connected to instrument: {}\n", this->receive_message_());
     this->check_for_error_();
 }
 
-void TCPConn::run()
+void Scope::run()
 {
     this->send_message_(":RUN");
     this->check_for_error_();
 }
 
-void TCPConn::stop()
+void Scope::stop()
 {
     this->send_message_(":STOP");
     this->check_for_error_();
 }
 
-void TCPConn::single()
+void Scope::single()
 {
     this->send_message_(":SING");
     this->check_for_error_();
 }
 
-void TCPConn::set_timebase(float secs_per_div)
+void Scope::set_timebase(float secs_per_div)
 {
     this->send_message_(fmt::format(":TIM:MAIN:SCAL {}", secs_per_div));
     this->check_for_error_();
 }
 
-void TCPConn::set_channel_scale(float volts_per_div)
+void Scope::set_channel_scale(float volts_per_div)
 {
     this->send_message_(fmt::format(":CHAN1:SCAL {}", volts_per_div));
     this->check_for_error_();
 }
 
-void TCPConn::set_rising_edge_trigger(float level)
+void Scope::set_rising_edge_trigger(float level)
 {
     const VerticalLimits limits = this->get_vertical_limits_();
 
@@ -247,7 +247,7 @@ void TCPConn::set_rising_edge_trigger(float level)
     this->check_for_error_();
 }
 
-void TCPConn::set_horizontal_position(float t)
+void Scope::set_horizontal_position(float t)
 {
     const HorizontalLimits limits = this->get_horizontal_limits_();
 
@@ -260,7 +260,7 @@ void TCPConn::set_horizontal_position(float t)
     this->check_for_error_();
 }
 
-void TCPConn::set_vertical_position(float v)
+void Scope::set_vertical_position(float v)
 {
     const VerticalLimits limits = this->get_vertical_limits_();
 

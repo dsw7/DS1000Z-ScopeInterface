@@ -14,10 +14,10 @@ struct VerticalLimits {
     float v_max = 0.00;
 };
 
-class TCPConn {
+class Scope {
 public:
-    TCPConn(bool verbose = false);
-    ~TCPConn();
+    Scope(bool verbose = false);
+    ~Scope();
 
     void establish_connection(const std::string &host, int port);
     void reset();
