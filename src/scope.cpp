@@ -3,6 +3,7 @@
 #include <fmt/core.h>
 #include <sstream>
 #include <stdexcept>
+#include <vector>
 
 namespace scope {
 
@@ -40,56 +41,36 @@ void Scope::check_for_error()
     }
 }
 
-HorizontalLimits Scope::get_horizontal_limits()
+void Scope::handshake()
 {
-    this->conn_.send_message(":TIM:MAIN:SCAL?");
-    const std::string scale = this->conn_.receive_message();
+    this->conn_.send_message("*IDN?");
+    std::string message = this->conn_.receive_message();
     this->check_for_error();
 
-    float secs_per_div = 0;
+    std::vector<std::string> idn_components;
+    std::string delimiter = ",";
 
-    try {
-        secs_per_div = std::stof(scale);
-    } catch (const std::invalid_argument &e) {
-        throw std::runtime_error(e.what());
+    size_t pos = 0;
+    while ((pos = message.find(delimiter)) != std::string::npos) {
+        idn_components.push_back(message.substr(0, pos));
+        message.erase(0, pos + delimiter.length());
+    }
+    idn_components.push_back(message);
+
+    if (idn_components.size() != 4) {
+        throw std::runtime_error("Something went wrong. *IDN? query did not return a valid ID string");
     }
 
-    HorizontalLimits limits;
-    limits.t_max = secs_per_div * 6;
-    limits.t_min = secs_per_div * -6;
-    return limits;
-}
-
-VerticalLimits Scope::get_vertical_limits()
-{
-    this->conn_.send_message(":CHAN1:SCAL?");
-    const std::string scale = this->conn_.receive_message();
-    this->check_for_error();
-
-    float volts_per_div = 0;
-
-    try {
-        volts_per_div = std::stof(scale);
-    } catch (const std::invalid_argument &e) {
-        throw std::runtime_error(e.what());
-    }
-
-    VerticalLimits limits;
-    limits.v_max = volts_per_div * 4;
-    limits.v_min = volts_per_div * -4;
-    return limits;
+    fmt::print("Handshake returned:\n");
+    fmt::print("-- Name:              {}\n", idn_components[0]);
+    fmt::print("-- Model:             {}\n", idn_components[1]);
+    fmt::print("-- Serial number:     {}\n", idn_components[2]);
+    fmt::print("-- Software version:  {}\n", idn_components[3]);
 }
 
 void Scope::reset()
 {
     this->conn_.send_message("*RST");
-    this->check_for_error();
-}
-
-void Scope::handshake()
-{
-    this->conn_.send_message("*IDN?");
-    fmt::print("Connected to instrument: {}\n", this->conn_.receive_message());
     this->check_for_error();
 }
 
@@ -170,6 +151,46 @@ void Scope::set_vertical_position(float v)
 
     this->conn_.send_message(fmt::format(":CHAN1:OFFS {}", v));
     this->check_for_error();
+}
+
+HorizontalLimits Scope::get_horizontal_limits()
+{
+    this->conn_.send_message(":TIM:MAIN:SCAL?");
+    const std::string scale = this->conn_.receive_message();
+    this->check_for_error();
+
+    float secs_per_div = 0;
+
+    try {
+        secs_per_div = std::stof(scale);
+    } catch (const std::invalid_argument &e) {
+        throw std::runtime_error(e.what());
+    }
+
+    HorizontalLimits limits;
+    limits.t_max = secs_per_div * 6;
+    limits.t_min = secs_per_div * -6;
+    return limits;
+}
+
+VerticalLimits Scope::get_vertical_limits()
+{
+    this->conn_.send_message(":CHAN1:SCAL?");
+    const std::string scale = this->conn_.receive_message();
+    this->check_for_error();
+
+    float volts_per_div = 0;
+
+    try {
+        volts_per_div = std::stof(scale);
+    } catch (const std::invalid_argument &e) {
+        throw std::runtime_error(e.what());
+    }
+
+    VerticalLimits limits;
+    limits.v_max = volts_per_div * 4;
+    limits.v_min = volts_per_div * -4;
+    return limits;
 }
 
 } // namespace scope

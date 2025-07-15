@@ -22,8 +22,8 @@ public:
     ~Scope();
 
     void check_for_error();
-    void reset();
     void handshake();
+    void reset();
     void run();
     void stop();
     void single();
