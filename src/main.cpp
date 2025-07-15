@@ -16,7 +16,7 @@ Automation for working with Rigol DS1000Z Series of oscilloscopes
 
 Usage:
   scope [OPTION]
-  scope [OPTION]... HOST
+  scope [OPTION]... WORKFLOW
 
 Options:
   -h, --help                 Print help information and exit
@@ -32,6 +32,10 @@ Display:
 
 Triggering:
   -l, --trigger-level        Set trigger level (in volts)
+
+Workflows:
+  default  Configure scope to measure built in 1KHz calibration wave
+  reset    Send *RST command. Restores instrument to the default state
 )";
 
     fmt::print("-- DS1000Z-ScopeInterface | v{}\n", PROJECT_VERSION);
@@ -104,7 +108,7 @@ parameters::Parameters read_cli(int argc, char **argv)
 
     for (int i = optind; i < argc; i++) {
         if (strcmp("scope", argv[i]) != 0) {
-            params.host = argv[i];
+            params.workflow = argv[i];
             break;
         }
     }
@@ -127,7 +131,11 @@ int main(int argc, char **argv)
     std::string errmsg;
 
     try {
-        workflows::example(params);
+        if (params.workflow == "reset") {
+            workflows::reset_device(params);
+        } else {
+            workflows::measure_cal_signal(params);
+        }
     } catch (const std::runtime_error &e) {
         failed = true;
         errmsg = e.what();

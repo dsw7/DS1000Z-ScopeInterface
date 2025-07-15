@@ -3,5 +3,6 @@
 #include "parameters.hpp"
 
 namespace workflows {
-void example(const parameters::Parameters &params);
+void reset_device(const parameters::Parameters &params);
+void measure_cal_signal(const parameters::Parameters &params);
 } // namespace workflows

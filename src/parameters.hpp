@@ -10,6 +10,7 @@ struct Parameters {
     bool enable_verbosity = false;
     int port = 5555;
     std::optional<std::string> host;
+    std::string workflow = "default";
 
     // trigger
     float trigger_level = 1.00;

@@ -4,12 +4,17 @@
 
 namespace workflows {
 
-void example(const parameters::Parameters &params)
+void reset_device(const parameters::Parameters &params)
 {
     scope::Scope scope_handle(params.host.value(), params.port, params.enable_verbosity);
-    scope_handle.reset();
     scope_handle.handshake();
+    scope_handle.reset();
+}
 
+void measure_cal_signal(const parameters::Parameters &params)
+{
+    scope::Scope scope_handle(params.host.value(), params.port, params.enable_verbosity);
+    scope_handle.handshake();
     scope_handle.set_timebase(params.secs_per_div);
     scope_handle.set_channel_scale(params.volts_per_div);
     scope_handle.set_rising_edge_trigger(params.trigger_level);
