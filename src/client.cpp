@@ -181,6 +181,12 @@ void TCPConn::establish_connection(const std::string &host, int port)
     this->is_connected_ = true;
 }
 
+void TCPConn::reset()
+{
+    this->send_message_("*RST");
+    this->check_for_error_();
+}
+
 void TCPConn::handshake()
 {
     this->send_message_("*IDN?");

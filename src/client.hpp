@@ -20,6 +20,7 @@ public:
     ~TCPConn();
 
     void establish_connection(const std::string &host, int port);
+    void reset();
     void handshake();
     void run();
     void stop();
