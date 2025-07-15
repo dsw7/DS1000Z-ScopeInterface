@@ -1,2 +1,5 @@
 # Compilation / testing artifacts
 build
+
+# External libs
+external
