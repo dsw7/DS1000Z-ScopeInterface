@@ -94,6 +94,46 @@ void TCPConn::check_for_error_()
     }
 }
 
+HorizontalLimits TCPConn::get_horizontal_limits_()
+{
+    this->send_message_(":TIM:MAIN:SCAL?");
+    const std::string scale = this->receive_message_();
+    this->check_for_error_();
+
+    float secs_per_div = 0;
+
+    try {
+        secs_per_div = std::stof(scale);
+    } catch (const std::invalid_argument &e) {
+        throw std::runtime_error(e.what());
+    }
+
+    HorizontalLimits limits;
+    limits.t_max = secs_per_div * 6;
+    limits.t_min = secs_per_div * -6;
+    return limits;
+}
+
+VerticalLimits TCPConn::get_vertical_limits_()
+{
+    this->send_message_(":CHAN1:SCAL?");
+    const std::string scale = this->receive_message_();
+    this->check_for_error_();
+
+    float volts_per_div = 0;
+
+    try {
+        volts_per_div = std::stof(scale);
+    } catch (const std::invalid_argument &e) {
+        throw std::runtime_error(e.what());
+    }
+
+    VerticalLimits limits;
+    limits.v_max = volts_per_div * 4;
+    limits.v_min = volts_per_div * -4;
+    return limits;
+}
+
 // ----------------------------------------------------------------------------------------------------------
 // public
 // ----------------------------------------------------------------------------------------------------------
@@ -148,12 +188,6 @@ void TCPConn::handshake()
     this->check_for_error_();
 }
 
-void TCPConn::clear()
-{
-    this->send_message_(":CLE");
-    this->check_for_error_();
-}
-
 void TCPConn::run()
 {
     this->send_message_(":RUN");
@@ -184,29 +218,9 @@ void TCPConn::set_channel_scale(float volts_per_div)
     this->check_for_error_();
 }
 
-ScreenLimits TCPConn::get_channel_scale()
-{
-    this->send_message_(":CHAN1:SCAL?");
-    const std::string scale = this->receive_message_();
-    this->check_for_error_();
-
-    float volts_per_div = 0;
-
-    try {
-        volts_per_div = std::stof(scale);
-    } catch (const std::invalid_argument &e) {
-        throw std::runtime_error(e.what());
-    }
-
-    ScreenLimits limits;
-    limits.v_max = volts_per_div * 4;
-    limits.v_min = volts_per_div * -4;
-    return limits;
-}
-
 void TCPConn::set_rising_edge_trigger(float level)
 {
-    const ScreenLimits limits = this->get_channel_scale();
+    const VerticalLimits limits = this->get_vertical_limits_();
 
     if (level < limits.v_min or level > limits.v_max) {
         // I/O between machine and scope will crash if we try to set trigger outside of limits
@@ -227,22 +241,29 @@ void TCPConn::set_rising_edge_trigger(float level)
     this->check_for_error_();
 }
 
-void TCPConn::set_channel_vertical_position(float offset_in_volts)
+void TCPConn::set_horizontal_position(float t)
 {
-    const ScreenLimits limits = this->get_channel_scale();
+    const HorizontalLimits limits = this->get_horizontal_limits_();
 
-    if (offset_in_volts < limits.v_min or offset_in_volts > limits.v_max) {
-        const std::string errmsg = fmt::format("Vertical position outside limits. The vertical limits are {}V and +{}V", limits.v_min, limits.v_max);
+    if (t < limits.t_min or t > limits.t_max) {
+        const std::string errmsg = fmt::format("Horizontal position (x) outside limits. The limits are {} s and +{} s", limits.t_min, limits.t_max);
         throw std::invalid_argument(errmsg);
     }
 
-    this->send_message_(fmt::format(":CHAN1:OFFS {}", offset_in_volts));
+    this->send_message_(fmt::format(":TIM:MAIN:OFFS {}", t));
     this->check_for_error_();
 }
 
-void TCPConn::set_horizontal_position(float position_in_secs)
+void TCPConn::set_vertical_position(float v)
 {
-    this->send_message_(fmt::format(":TIM:MAIN:OFFS {}", position_in_secs));
+    const VerticalLimits limits = this->get_vertical_limits_();
+
+    if (v < limits.v_min or v > limits.v_max) {
+        const std::string errmsg = fmt::format("Vertical position (y) outside limits. The vertical limits are {}V and +{}V", limits.v_min, limits.v_max);
+        throw std::invalid_argument(errmsg);
+    }
+
+    this->send_message_(fmt::format(":CHAN1:OFFS {}", v));
     this->check_for_error_();
 }
 
