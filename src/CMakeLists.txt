@@ -26,11 +26,11 @@ endif()
 include_directories(src external)
 add_executable(
   scope
+  configs.cpp
   main.cpp
   parameters.cpp
   scope.cpp
   tcp_conn.cpp
-  utils.cpp
   workflows.cpp
 )
 
