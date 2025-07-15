@@ -19,13 +19,18 @@ Usage:
   scope [OPTION]... HOST
 
 Options:
-  -h, --help             Print help information and exit
-  -v, --verbose          Enable additional verbosity for debugging purposes
-  -p, --port             Oscilloscope port (default is 5555)
-  -t, --timebase         Set horizontal scale (seconds / horizontal division)
-  -l, --trigger-level    Set trigger level (in volts)
-  -s, --scale            Set vertical scale (volts / vertical division)
-  -y, --vertical-offset  Set channel vertical position (in volts)
+  -h, --help                 Print help information and exit
+  -v, --verbose              Enable additional verbosity for debugging purposes
+  -p, --port                 Oscilloscope port (default is 5555)
+
+Display:
+  -t, --timebase             Set horizontal scale (seconds / horizontal division)
+  -s, --scale                Set vertical scale (volts / vertical division)
+  -x, --horizontal-position  Set channel vertical position (in volts)
+  -y, --vertical-position    Set channel vertical position (in volts)
+
+Triggering:
+  -l, --trigger-level        Set trigger level (in volts)
 )";
 
     fmt::print("-- DS1000Z-ScopeInterface | v{}\n", PROJECT_VERSION);
@@ -44,12 +49,13 @@ parameters::Parameters read_cli(int argc, char **argv)
             { "timebase", required_argument, 0, 't' },
             { "trigger-level", required_argument, 0, 'l' },
             { "scale", required_argument, 0, 's' },
-            { "vertical-offset", required_argument, 0, 'y' },
+            { "horizontal-position", required_argument, 0, 'x' },
+            { "vertical-position", required_argument, 0, 'y' },
             { 0, 0, 0, 0 },
         };
 
         int option_index = 0;
-        int c = getopt_long(argc, argv, "hvp:t:l:s:y:", long_options, &option_index);
+        int c = getopt_long(argc, argv, "hvp:t:l:s:x:y:", long_options, &option_index);
 
         if (c == -1) {
             break;
@@ -74,8 +80,11 @@ parameters::Parameters read_cli(int argc, char **argv)
             case 's':
                 params.set_scale(optarg);
                 break;
+            case 'x':
+                params.set_horizontal_position(optarg);
+                break;
             case 'y':
-                params.set_vertical_offset(optarg);
+                params.set_vertical_position(optarg);
                 break;
             default:
                 print_help_messages();

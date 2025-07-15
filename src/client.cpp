@@ -174,13 +174,13 @@ void TCPConn::single()
 
 void TCPConn::set_timebase(float secs_per_div)
 {
-    this->send_message_(":TIM:MAIN:SCAL " + std::to_string(secs_per_div));
+    this->send_message_(fmt::format(":TIM:MAIN:SCAL {}", secs_per_div));
     this->check_for_error_();
 }
 
 void TCPConn::set_channel_scale(float volts_per_div)
 {
-    this->send_message_(":CHAN1:SCAL " + std::to_string(volts_per_div));
+    this->send_message_(fmt::format(":CHAN1:SCAL {}", volts_per_div));
     this->check_for_error_();
 }
 
@@ -217,7 +217,7 @@ void TCPConn::set_rising_edge_trigger(float level)
     this->send_message_(":TRIG:MODE EDGE");
     this->check_for_error_();
 
-    this->send_message_(":TRIG:EDG:LEV " + std::to_string(level));
+    this->send_message_(fmt::format(":TRIG:EDG:LEV {}", level));
     this->check_for_error_();
 
     this->send_message_(":TRIG:EDG:SOUR CHAN1");
@@ -232,11 +232,17 @@ void TCPConn::set_channel_vertical_position(float offset_in_volts)
     const ScreenLimits limits = this->get_channel_scale();
 
     if (offset_in_volts < limits.v_min or offset_in_volts > limits.v_max) {
-        const std::string errmsg = fmt::format("Vertical offset outside limits. The vertical limits are {}V and +{}V", limits.v_min, limits.v_max);
+        const std::string errmsg = fmt::format("Vertical position outside limits. The vertical limits are {}V and +{}V", limits.v_min, limits.v_max);
         throw std::invalid_argument(errmsg);
     }
 
-    this->send_message_(":CHAN1:OFFS " + std::to_string(offset_in_volts));
+    this->send_message_(fmt::format(":CHAN1:OFFS {}", offset_in_volts));
+    this->check_for_error_();
+}
+
+void TCPConn::set_horizontal_position(float position_in_secs)
+{
+    this->send_message_(fmt::format(":TIM:MAIN:OFFS {}", position_in_secs));
     this->check_for_error_();
 }
 

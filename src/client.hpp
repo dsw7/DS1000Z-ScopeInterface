@@ -5,8 +5,8 @@
 namespace client {
 
 struct ScreenLimits {
-    float v_min;
-    float v_max;
+    float v_min = 0.00;
+    float v_max = 0.00;
 };
 
 class TCPConn {
@@ -25,6 +25,7 @@ public:
     ScreenLimits get_channel_scale();
     void set_rising_edge_trigger(float level);
     void set_channel_vertical_position(float offset_in_volts);
+    void set_horizontal_position(float position_in_secs);
 
 private:
     void check_for_error_();

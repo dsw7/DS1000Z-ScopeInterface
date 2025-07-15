@@ -64,20 +64,29 @@ void Parameters::set_scale(const std::string &volts_per_div)
     }
 }
 
-void Parameters::set_vertical_offset(const std::string &vertical_offset)
+void Parameters::set_horizontal_position(const std::string &horizontal_position)
 {
     try {
-        this->vertical_offset = std::stof(vertical_offset);
+        this->horizontal_position = std::stof(horizontal_position);
     } catch (const std::invalid_argument &e) {
-        throw std::invalid_argument("Failed to convert vertical offset to floating point value: " + (std::string)e.what());
+        throw std::invalid_argument("Failed to convert horizontal position to floating point value: " + (std::string)e.what());
+    }
+}
+
+void Parameters::set_vertical_position(const std::string &vertical_position)
+{
+    try {
+        this->vertical_position = std::stof(vertical_position);
+    } catch (const std::invalid_argument &e) {
+        throw std::invalid_argument("Failed to convert vertical position to floating point value: " + (std::string)e.what());
     }
 
-    if (this->vertical_offset < -10.00) {
-        throw std::invalid_argument("Vertical offset cannot be less than -10.00V");
+    if (this->vertical_position < -10.00) {
+        throw std::invalid_argument("Vertical position cannot be less than -10.00V");
     }
 
-    if (this->vertical_offset > 10.00) {
-        throw std::invalid_argument("Vertical offset cannot be greater than 10.00V");
+    if (this->vertical_position > 10.00) {
+        throw std::invalid_argument("Vertical position cannot be greater than 10.00V");
     }
 }
 
