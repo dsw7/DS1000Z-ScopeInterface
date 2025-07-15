@@ -66,7 +66,7 @@ std::string TCPConn::receive_message_()
     }
 
     if (this->verbose_) {
-        fmt::print("Received message: {} ({} bytes)\n", message, bytes_received);
+        fmt::print("Received message: {}\n ({} bytes)\n", message, bytes_received);
     }
 
     return message;
@@ -178,15 +178,39 @@ void TCPConn::set_timebase(float secs_per_div)
     this->check_for_error_();
 }
 
+void TCPConn::set_channel_scale(float volts_per_div)
+{
+    this->send_message_(":CHAN1:SCAL " + std::to_string(volts_per_div));
+    this->check_for_error_();
+}
+
+ScreenLimits TCPConn::get_channel_scale()
+{
+    this->send_message_(":CHAN1:SCAL?");
+    const std::string scale = this->receive_message_();
+    this->check_for_error_();
+
+    float volts_per_div = 0;
+
+    try {
+        volts_per_div = std::stof(scale);
+    } catch (const std::invalid_argument &e) {
+        throw std::runtime_error(e.what());
+    }
+
+    ScreenLimits limits;
+    limits.v_max = volts_per_div * 4;
+    limits.v_min = volts_per_div * -4;
+    return limits;
+}
+
 void TCPConn::set_rising_edge_trigger(float level)
 {
-    float volts_per_div = this->get_channel_scale();
-    float upper_limit = volts_per_div * 4;
-    float lower_limit = -1 * upper_limit;
+    const ScreenLimits limits = this->get_channel_scale();
 
-    if (level < lower_limit or level > upper_limit) {
+    if (level < limits.v_min or level > limits.v_max) {
         // I/O between machine and scope will crash if we try to set trigger outside of limits
-        const std::string errmsg = fmt::format("Trigger outside limits. The vertical limits are {}V and +{}V", lower_limit, upper_limit);
+        const std::string errmsg = fmt::format("Trigger outside limits. The vertical limits are {}V and +{}V", limits.v_min, limits.v_max);
         throw std::invalid_argument(errmsg);
     }
 
@@ -203,31 +227,15 @@ void TCPConn::set_rising_edge_trigger(float level)
     this->check_for_error_();
 }
 
-void TCPConn::set_channel_scale(float volts_per_div)
-{
-    this->send_message_(":CHAN1:SCAL " + std::to_string(volts_per_div));
-    this->check_for_error_();
-}
-
-float TCPConn::get_channel_scale()
-{
-    this->send_message_(":CHAN1:SCAL?");
-    const std::string scale = this->receive_message_();
-    this->check_for_error_();
-
-    float volts_per_div = 0;
-
-    try {
-        volts_per_div = std::stof(scale);
-    } catch (const std::invalid_argument &e) {
-        throw std::runtime_error(e.what());
-    }
-
-    return volts_per_div;
-}
-
 void TCPConn::set_channel_vertical_position(float offset_in_volts)
 {
+    const ScreenLimits limits = this->get_channel_scale();
+
+    if (offset_in_volts < limits.v_min or offset_in_volts > limits.v_max) {
+        const std::string errmsg = fmt::format("Vertical offset outside limits. The vertical limits are {}V and +{}V", limits.v_min, limits.v_max);
+        throw std::invalid_argument(errmsg);
+    }
+
     this->send_message_(":CHAN1:OFFS " + std::to_string(offset_in_volts));
     this->check_for_error_();
 }

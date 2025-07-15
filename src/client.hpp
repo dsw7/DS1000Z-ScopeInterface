@@ -4,6 +4,11 @@
 
 namespace client {
 
+struct ScreenLimits {
+    float v_min;
+    float v_max;
+};
+
 class TCPConn {
 public:
     TCPConn(bool verbose = false);
@@ -16,9 +21,9 @@ public:
     void stop();
     void single();
     void set_timebase(float secs_per_div);
-    void set_rising_edge_trigger(float level);
     void set_channel_scale(float volts_per_div);
-    float get_channel_scale();
+    ScreenLimits get_channel_scale();
+    void set_rising_edge_trigger(float level);
     void set_channel_vertical_position(float offset_in_volts);
 
 private:
