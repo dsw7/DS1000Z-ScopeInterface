@@ -21,7 +21,8 @@ Usage:
 Options:
   -h, --help                 Print help information and exit
   -v, --verbose              Enable additional verbosity for debugging purposes
-  -p, --port                 Oscilloscope port (default is 5555)
+      --host                 Oscilloscope host (option is mandatory)
+      --port                 Oscilloscope port (default is 5555)
 
 Display:
   -t, --timebase             Set horizontal scale (seconds / horizontal division)
@@ -45,7 +46,8 @@ parameters::Parameters read_cli(int argc, char **argv)
         static struct option long_options[] = {
             { "help", no_argument, 0, 'h' },
             { "verbose", no_argument, 0, 'v' },
-            { "port", required_argument, 0, 'p' },
+            { "host", required_argument, 0, 0 },
+            { "port", required_argument, 0, 0 },
             { "timebase", required_argument, 0, 't' },
             { "trigger-level", required_argument, 0, 'l' },
             { "scale", required_argument, 0, 's' },
@@ -55,21 +57,25 @@ parameters::Parameters read_cli(int argc, char **argv)
         };
 
         int option_index = 0;
-        int c = getopt_long(argc, argv, "hvp:t:l:s:x:y:", long_options, &option_index);
+        int c = getopt_long(argc, argv, "hvt:l:s:x:y:", long_options, &option_index);
 
         if (c == -1) {
             break;
         }
 
         switch (c) {
+            case 0:
+                if (strcmp(long_options[option_index].name, "host") == 0) {
+                    params.host = optarg;
+                } else if (strcmp(long_options[option_index].name, "port") == 0) {
+                    params.set_port(optarg);
+                }
+                break;
             case 'h':
                 print_help_messages();
                 exit(EXIT_SUCCESS);
             case 'v':
                 params.enable_verbosity = true;
-                break;
-            case 'p':
-                params.set_port(optarg);
                 break;
             case 't':
                 params.set_timebase(optarg);
@@ -92,6 +98,10 @@ parameters::Parameters read_cli(int argc, char **argv)
         }
     };
 
+    if (not params.host) {
+        throw std::invalid_argument("Host is unspecified. Set with --host option");
+    }
+
     for (int i = optind; i < argc; i++) {
         if (strcmp("scope", argv[i]) != 0) {
             params.host = argv[i];
@@ -110,11 +120,6 @@ int main(int argc, char **argv)
         params = read_cli(argc, argv);
     } catch (const std::invalid_argument &e) {
         std::cerr << fmt::format("{}\n", e.what());
-        return 1;
-    }
-
-    if (not params.host) {
-        std::cerr << "Host argument is not set!\n";
         return 1;
     }
 
