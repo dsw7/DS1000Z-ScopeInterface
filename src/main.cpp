@@ -134,7 +134,7 @@ int main(int argc, char **argv)
         if (params.workflow == "reset") {
             workflows::reset_device(params);
         } else {
-            workflows::measure_cal_signal(params);
+            workflows::run_default(params);
         }
     } catch (const std::runtime_error &e) {
         failed = true;

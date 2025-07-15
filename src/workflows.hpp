@@ -4,5 +4,5 @@
 
 namespace workflows {
 void reset_device(const parameters::Parameters &params);
-void measure_cal_signal(const parameters::Parameters &params);
+void run_default(const parameters::Parameters &params);
 } // namespace workflows

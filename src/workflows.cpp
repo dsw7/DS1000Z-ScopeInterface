@@ -2,32 +2,13 @@
 
 #include "scope.hpp"
 #include "toml.hpp"
+#include "utils.hpp"
 
-#include <filesystem>
-#include <fstream>
-#include <iostream>
 #include <stdexcept>
 
 namespace {
 
-std::string get_path_to_project_config()
-{
-    const char *home_dir = std::getenv("HOME");
-
-    if (not home_dir) {
-        throw std::runtime_error("Could not determine home directory");
-    }
-
-    const std::filesystem::path config_path = std::filesystem::path(home_dir) / ".scope.toml";
-
-    if (not std::filesystem::exists(config_path)) {
-        throw std::runtime_error("Configuration file .scope.toml not found in home directory");
-    }
-
-    return config_path.string();
-}
-
-struct ConfigsMeasureCalSignal {
+struct ConfigsDefaultSection {
     float horizontal_position = 0.00;
     float secs_per_div = 0.0005;
     float trigger_level = 1.00;
@@ -35,9 +16,10 @@ struct ConfigsMeasureCalSignal {
     float volts_per_div = 1.00;
 };
 
-void load_config_file(ConfigsMeasureCalSignal &configs)
+ConfigsDefaultSection load_default_section()
 {
-    const std::string config_file = get_path_to_project_config();
+    const std::string config_file = utils::get_path_to_project_config();
+    ConfigsDefaultSection configs;
 
     try {
         const toml::table config = toml::parse_file(config_file);
@@ -49,6 +31,8 @@ void load_config_file(ConfigsMeasureCalSignal &configs)
     } catch (const toml::parse_error &e) {
         throw std::runtime_error(e.what());
     }
+
+    return configs;
 }
 
 } // namespace
@@ -62,10 +46,9 @@ void reset_device(const parameters::Parameters &params)
     scope_handle.reset();
 }
 
-void measure_cal_signal(const parameters::Parameters &params)
+void run_default(const parameters::Parameters &params)
 {
-    ConfigsMeasureCalSignal configs;
-    load_config_file(configs);
+    const ConfigsDefaultSection configs = load_default_section();
 
     scope::Scope scope_handle(params.host.value(), params.port, params.enable_verbosity);
     scope_handle.handshake();

@@ -30,6 +30,7 @@ add_executable(
   parameters.cpp
   scope.cpp
   tcp_conn.cpp
+  utils.cpp
   workflows.cpp
 )
 
