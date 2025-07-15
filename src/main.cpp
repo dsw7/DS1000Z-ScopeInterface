@@ -19,22 +19,14 @@ Usage:
   scope [OPTION]... WORKFLOW
 
 Options:
-  -h, --help                 Print help information and exit
-  -v, --verbose              Enable additional verbosity for debugging purposes
-      --host                 Oscilloscope host (option is mandatory)
-      --port                 Oscilloscope port (default is 5555)
-
-Display:
-  -t, --timebase             Set horizontal scale (seconds / horizontal division)
-  -s, --scale                Set vertical scale (volts / vertical division)
-  -y, --vertical-position    Set channel vertical position (in volts)
-
-Triggering:
-  -l, --trigger-level        Set trigger level (in volts)
+  -h, --help     Print help information and exit
+  -v, --verbose  Enable additional verbosity for debugging purposes
+      --host     Oscilloscope host (option is mandatory)
+      --port     Oscilloscope port (default is 5555)
 
 Workflows:
-  default  Configure scope to measure built in 1KHz calibration wave
-  reset    Send *RST command. Restores instrument to the default state
+  default        Configure scope to measure built in 1KHz calibration wave
+  reset          Send *RST command. Restores instrument to the default state
 )";
 
     fmt::print("-- DS1000Z-ScopeInterface | v{}\n", PROJECT_VERSION);
@@ -51,15 +43,11 @@ parameters::Parameters read_cli(int argc, char **argv)
             { "verbose", no_argument, 0, 'v' },
             { "host", required_argument, 0, 0 },
             { "port", required_argument, 0, 0 },
-            { "timebase", required_argument, 0, 't' },
-            { "trigger-level", required_argument, 0, 'l' },
-            { "scale", required_argument, 0, 's' },
-            { "vertical-position", required_argument, 0, 'y' },
             { 0, 0, 0, 0 },
         };
 
         int option_index = 0;
-        int c = getopt_long(argc, argv, "hvt:l:s:y:", long_options, &option_index);
+        int c = getopt_long(argc, argv, "hv", long_options, &option_index);
 
         if (c == -1) {
             break;
@@ -78,18 +66,6 @@ parameters::Parameters read_cli(int argc, char **argv)
                 exit(EXIT_SUCCESS);
             case 'v':
                 params.enable_verbosity = true;
-                break;
-            case 't':
-                params.set_timebase(optarg);
-                break;
-            case 'l':
-                params.set_trigger_level(optarg);
-                break;
-            case 's':
-                params.set_scale(optarg);
-                break;
-            case 'y':
-                params.set_vertical_position(optarg);
                 break;
             default:
                 print_help_messages();

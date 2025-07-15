@@ -31,6 +31,21 @@ namespace configs {
 
 void ConfigsDefaultSection::run_validation()
 {
+    if (this->secs_per_div <= 0 or this->secs_per_div > 50) {
+        throw std::invalid_argument("Timebase must be > 0 and <= 50 seconds");
+    }
+
+    if (this->trigger_level < -5.00 or this->trigger_level > 5.00) {
+        throw std::invalid_argument("Trigger level must be between -5.00V and 5.00V");
+    }
+
+    if (this->volts_per_div < -0.01 or this->volts_per_div > 100) {
+        throw std::invalid_argument("Vertical scale must be between 0.01V and 100V");
+    }
+
+    if (this->vertical_position < -10.00 or this->vertical_position > 10.00) {
+        throw std::invalid_argument("Vertical position must be between -10.00V and 10.00V");
+    }
 }
 
 ConfigsDefaultSection load_default_section()
