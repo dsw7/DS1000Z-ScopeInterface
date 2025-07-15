@@ -16,7 +16,6 @@ struct Parameters {
     float trigger_level = 1.00;
 
     // display
-    float horizontal_position = 0.00;
     float secs_per_div = 0.0005;
     float vertical_position = 0.00;
     float volts_per_div = 1.00;

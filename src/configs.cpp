@@ -29,6 +29,10 @@ std::string get_path_to_project_config()
 
 namespace configs {
 
+void ConfigsDefaultSection::run_validation()
+{
+}
+
 ConfigsDefaultSection load_default_section()
 {
     const std::string config_file = get_path_to_project_config();

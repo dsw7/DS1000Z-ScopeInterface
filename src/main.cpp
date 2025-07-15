@@ -27,7 +27,6 @@ Options:
 Display:
   -t, --timebase             Set horizontal scale (seconds / horizontal division)
   -s, --scale                Set vertical scale (volts / vertical division)
-  -x, --horizontal-position  Set channel vertical position (in volts)
   -y, --vertical-position    Set channel vertical position (in volts)
 
 Triggering:
@@ -55,13 +54,12 @@ parameters::Parameters read_cli(int argc, char **argv)
             { "timebase", required_argument, 0, 't' },
             { "trigger-level", required_argument, 0, 'l' },
             { "scale", required_argument, 0, 's' },
-            { "horizontal-position", required_argument, 0, 'x' },
             { "vertical-position", required_argument, 0, 'y' },
             { 0, 0, 0, 0 },
         };
 
         int option_index = 0;
-        int c = getopt_long(argc, argv, "hvt:l:s:x:y:", long_options, &option_index);
+        int c = getopt_long(argc, argv, "hvt:l:s:y:", long_options, &option_index);
 
         if (c == -1) {
             break;
@@ -89,9 +87,6 @@ parameters::Parameters read_cli(int argc, char **argv)
                 break;
             case 's':
                 params.set_scale(optarg);
-                break;
-            case 'x':
-                params.set_horizontal_position(optarg);
                 break;
             case 'y':
                 params.set_vertical_position(optarg);

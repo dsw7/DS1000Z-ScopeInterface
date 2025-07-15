@@ -64,15 +64,6 @@ void Parameters::set_scale(const std::string &volts_per_div)
     }
 }
 
-void Parameters::set_horizontal_position(const std::string &horizontal_position)
-{
-    try {
-        this->horizontal_position = std::stof(horizontal_position);
-    } catch (const std::invalid_argument &e) {
-        throw std::invalid_argument("Failed to convert horizontal position to floating point value: " + (std::string)e.what());
-    }
-}
-
 void Parameters::set_vertical_position(const std::string &vertical_position)
 {
     try {
