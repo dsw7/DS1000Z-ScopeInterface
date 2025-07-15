@@ -4,7 +4,6 @@
 #include <cerrno>
 #include <cstring>
 #include <fmt/core.h>
-#include <sstream>
 #include <stdexcept>
 #include <sys/socket.h>
 #include <unistd.h>
@@ -19,8 +18,6 @@ void TCPConn::connect(const std::string &host, int port, bool enable_verbosity)
     if (this->sockfd_ == -1) {
         throw std::runtime_error(std::strerror(errno));
     }
-
-    fmt::print("Attempting to connect to {}:{}\n", host, port);
 
     struct sockaddr_in server_address;
     memset(&server_address, 0, sizeof(server_address));

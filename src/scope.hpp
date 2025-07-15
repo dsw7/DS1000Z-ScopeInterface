@@ -1,5 +1,7 @@
 #pragma once
 
+#include "tcp_conn.hpp"
+
 #include <string>
 
 namespace scope {
@@ -16,10 +18,10 @@ struct VerticalLimits {
 
 class Scope {
 public:
-    Scope(bool verbose = false);
+    Scope(const std::string &host, int port, bool enable_verbosity);
     ~Scope();
 
-    void establish_connection(const std::string &host, int port);
+    void check_for_error();
     void reset();
     void handshake();
     void run();
@@ -30,18 +32,11 @@ public:
     void set_rising_edge_trigger(float level);
     void set_horizontal_position(float t);
     void set_vertical_position(float v);
+    HorizontalLimits get_horizontal_limits();
+    VerticalLimits get_vertical_limits();
 
 private:
-    void check_for_error_();
-    std::string receive_message_();
-    void send_message_(const std::string &message);
-
-    HorizontalLimits get_horizontal_limits_();
-    VerticalLimits get_vertical_limits_();
-
-    bool is_connected_ = false;
-    bool verbose_ = false;
-    int sockfd_ = 0;
+    tcp_conn::TCPConn conn_;
 };
 
 } // namespace scope

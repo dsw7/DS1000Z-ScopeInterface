@@ -14,6 +14,7 @@ add_executable(
   main.cpp
   parameters.cpp
   scope.cpp
+  tcp_conn.cpp
   workflows.cpp
 )
 

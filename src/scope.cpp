@@ -1,81 +1,27 @@
 #include "scope.hpp"
 
-#include <arpa/inet.h>
-#include <cerrno>
-#include <cstring>
 #include <fmt/core.h>
 #include <sstream>
 #include <stdexcept>
-#include <string.h>
-#include <sys/socket.h>
-#include <unistd.h>
 
 namespace scope {
 
-// ----------------------------------------------------------------------------------------------------------
-// private
-// ----------------------------------------------------------------------------------------------------------
-
-void Scope::send_message_(const std::string &message)
+Scope::Scope(const std::string &host, int port, bool enable_verbosity)
 {
-    if (not this->is_connected_) {
-        throw std::logic_error("Cannot send message. Socket file descriptor is not connected to any address");
-    }
-
-    if (message.empty()) {
-        throw std::runtime_error("Cannot send empty message");
-    }
-
-    std::string message_ = message;
-
-    if (message_.back() != '\n') {
-        message_.push_back('\n');
-    }
-
-    int bytes_sent = send(this->sockfd_, message_.c_str(), message_.size(), 0);
-
-    if (bytes_sent == -1) {
-        throw std::runtime_error(std::strerror(errno));
-    }
-
-    if (this->verbose_) {
-        fmt::print("Sent message: {} ({} bytes)\n", message_, bytes_sent);
-    }
+    fmt::print("Attempting to connect to {}:{}\n", host, port);
+    this->conn_.connect(host, port, enable_verbosity);
 }
 
-std::string Scope::receive_message_()
+Scope::~Scope()
 {
-    if (not this->is_connected_) {
-        throw std::logic_error("Cannot receive message. Socket file descriptor is not connected to any address");
-    }
-
-    char buffer[1024];
-    int bytes_received = recv(this->sockfd_, buffer, sizeof(buffer) - 1, 0);
-
-    if (bytes_received == -1) {
-        throw std::runtime_error(std::strerror(errno));
-    }
-
-    buffer[bytes_received] = '\0';
-    std::string message(buffer);
-
-    if (not message.empty()) {
-        if (message.back() == '\n') {
-            message.pop_back();
-        }
-    }
-
-    if (this->verbose_) {
-        fmt::print("Received message: {}\n ({} bytes)\n", message, bytes_received);
-    }
-
-    return message;
+    fmt::print("Disconnecting from device\n");
+    this->conn_.disconnect();
 }
 
-void Scope::check_for_error_()
+void Scope::check_for_error()
 {
-    this->send_message_(":SYST:ERR?");
-    const std::string error = this->receive_message_();
+    this->conn_.send_message(":SYST:ERR?");
+    const std::string error = this->conn_.receive_message();
 
     std::istringstream err_stream(error);
     int code = 0;
@@ -94,11 +40,11 @@ void Scope::check_for_error_()
     }
 }
 
-HorizontalLimits Scope::get_horizontal_limits_()
+HorizontalLimits Scope::get_horizontal_limits()
 {
-    this->send_message_(":TIM:MAIN:SCAL?");
-    const std::string scale = this->receive_message_();
-    this->check_for_error_();
+    this->conn_.send_message(":TIM:MAIN:SCAL?");
+    const std::string scale = this->conn_.receive_message();
+    this->check_for_error();
 
     float secs_per_div = 0;
 
@@ -114,11 +60,11 @@ HorizontalLimits Scope::get_horizontal_limits_()
     return limits;
 }
 
-VerticalLimits Scope::get_vertical_limits_()
+VerticalLimits Scope::get_vertical_limits()
 {
-    this->send_message_(":CHAN1:SCAL?");
-    const std::string scale = this->receive_message_();
-    this->check_for_error_();
+    this->conn_.send_message(":CHAN1:SCAL?");
+    const std::string scale = this->conn_.receive_message();
+    this->check_for_error();
 
     float volts_per_div = 0;
 
@@ -134,99 +80,52 @@ VerticalLimits Scope::get_vertical_limits_()
     return limits;
 }
 
-// ----------------------------------------------------------------------------------------------------------
-// public
-// ----------------------------------------------------------------------------------------------------------
-
-Scope::Scope(bool verbose)
-{
-    if (verbose) {
-        this->verbose_ = true;
-    }
-
-    this->sockfd_ = socket(AF_INET, SOCK_STREAM, 0);
-
-    if (this->sockfd_ == -1) {
-        throw std::runtime_error(std::strerror(errno));
-    }
-}
-
-Scope::~Scope()
-{
-    if (this->sockfd_ != -1) {
-        close(this->sockfd_);
-    }
-
-    this->is_connected_ = false;
-}
-
-void Scope::establish_connection(const std::string &host, int port)
-{
-    fmt::print("Attempting to connect to {}:{}\n", host, port);
-
-    struct sockaddr_in server_address;
-    memset(&server_address, 0, sizeof(server_address));
-    server_address.sin_family = AF_INET;
-    server_address.sin_port = htons(port);
-
-    if (inet_pton(AF_INET, host.c_str(), &server_address.sin_addr) <= 0) {
-        throw std::runtime_error("Invalid address or address not supported");
-    }
-
-    if (connect(this->sockfd_, (struct sockaddr *)&server_address, sizeof(server_address)) == -1) {
-        close(this->sockfd_);
-        throw std::runtime_error("Connection failed");
-    }
-
-    this->is_connected_ = true;
-}
-
 void Scope::reset()
 {
-    this->send_message_("*RST");
-    this->check_for_error_();
+    this->conn_.send_message("*RST");
+    this->check_for_error();
 }
 
 void Scope::handshake()
 {
-    this->send_message_("*IDN?");
-    fmt::print("Connected to instrument: {}\n", this->receive_message_());
-    this->check_for_error_();
+    this->conn_.send_message("*IDN?");
+    fmt::print("Connected to instrument: {}\n", this->conn_.receive_message());
+    this->check_for_error();
 }
 
 void Scope::run()
 {
-    this->send_message_(":RUN");
-    this->check_for_error_();
+    this->conn_.send_message(":RUN");
+    this->check_for_error();
 }
 
 void Scope::stop()
 {
-    this->send_message_(":STOP");
-    this->check_for_error_();
+    this->conn_.send_message(":STOP");
+    this->check_for_error();
 }
 
 void Scope::single()
 {
-    this->send_message_(":SING");
-    this->check_for_error_();
+    this->conn_.send_message(":SING");
+    this->check_for_error();
 }
 
 void Scope::set_timebase(float secs_per_div)
 {
-    this->send_message_(fmt::format(":TIM:MAIN:SCAL {}", secs_per_div));
-    this->check_for_error_();
+    this->conn_.send_message(fmt::format(":TIM:MAIN:SCAL {}", secs_per_div));
+    this->check_for_error();
 }
 
 void Scope::set_channel_scale(float volts_per_div)
 {
-    this->send_message_(fmt::format(":CHAN1:SCAL {}", volts_per_div));
-    this->check_for_error_();
+    this->conn_.send_message(fmt::format(":CHAN1:SCAL {}", volts_per_div));
+    this->check_for_error();
 }
 
 void Scope::set_rising_edge_trigger(float level)
 {
-    const VerticalLimits limits = this->get_vertical_limits_();
+    const VerticalLimits limits = this->get_vertical_limits();
 
     if (level < limits.v_min or level > limits.v_max) {
         // I/O between machine and scope will crash if we try to set trigger outside of limits
@@ -234,43 +133,43 @@ void Scope::set_rising_edge_trigger(float level)
         throw std::invalid_argument(errmsg);
     }
 
-    this->send_message_(":TRIG:MODE EDGE");
-    this->check_for_error_();
+    this->conn_.send_message(":TRIG:MODE EDGE");
+    this->check_for_error();
 
-    this->send_message_(fmt::format(":TRIG:EDG:LEV {}", level));
-    this->check_for_error_();
+    this->conn_.send_message(fmt::format(":TRIG:EDG:LEV {}", level));
+    this->check_for_error();
 
-    this->send_message_(":TRIG:EDG:SOUR CHAN1");
-    this->check_for_error_();
+    this->conn_.send_message(":TRIG:EDG:SOUR CHAN1");
+    this->check_for_error();
 
-    this->send_message_(":TRIG:EDG:SLOP POS");
-    this->check_for_error_();
+    this->conn_.send_message(":TRIG:EDG:SLOP POS");
+    this->check_for_error();
 }
 
 void Scope::set_horizontal_position(float t)
 {
-    const HorizontalLimits limits = this->get_horizontal_limits_();
+    const HorizontalLimits limits = this->get_horizontal_limits();
 
     if (t < limits.t_min or t > limits.t_max) {
         const std::string errmsg = fmt::format("Horizontal position (x) outside limits. The limits are {} s and +{} s", limits.t_min, limits.t_max);
         throw std::invalid_argument(errmsg);
     }
 
-    this->send_message_(fmt::format(":TIM:MAIN:OFFS {}", t));
-    this->check_for_error_();
+    this->conn_.send_message(fmt::format(":TIM:MAIN:OFFS {}", t));
+    this->check_for_error();
 }
 
 void Scope::set_vertical_position(float v)
 {
-    const VerticalLimits limits = this->get_vertical_limits_();
+    const VerticalLimits limits = this->get_vertical_limits();
 
     if (v < limits.v_min or v > limits.v_max) {
         const std::string errmsg = fmt::format("Vertical position (y) outside limits. The vertical limits are {}V and +{}V", limits.v_min, limits.v_max);
         throw std::invalid_argument(errmsg);
     }
 
-    this->send_message_(fmt::format(":CHAN1:OFFS {}", v));
-    this->check_for_error_();
+    this->conn_.send_message(fmt::format(":CHAN1:OFFS {}", v));
+    this->check_for_error();
 }
 
 } // namespace scope
