@@ -15,7 +15,7 @@ void print_help_messages()
 Automation for working with Rigol DS1000Z Series of oscilloscopes
 
 Usage:
-  scope [OPTIONS] WORKFLOW
+  scope [OPTIONS] [WORKFLOW]
 
 Options:
   -h, --help       Print help information and exit

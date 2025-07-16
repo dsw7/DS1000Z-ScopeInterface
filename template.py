@@ -12,7 +12,7 @@ import click
 )
 @click.option("--port", default=5555, help="Oscilloscope port", show_default=True)
 @click.option("--host", help="Oscilloscope host", required=True)
-@click.argument("workflow")
+@click.argument("workflow", required=False)
 def main(workflow):
     pass
 
