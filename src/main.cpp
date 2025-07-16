@@ -15,18 +15,17 @@ void print_help_messages()
 Automation for working with Rigol DS1000Z Series of oscilloscopes
 
 Usage:
-  scope [OPTION]
-  scope [OPTION]... WORKFLOW
+  scope [OPTIONS] WORKFLOW
 
 Options:
-  -h, --help     Print help information and exit
-  -v, --verbose  Enable additional verbosity for debugging purposes
-      --host     Oscilloscope host (option is mandatory)
-      --port     Oscilloscope port (default is 5555)
+  -h, --help       Print help information and exit
+      --host HOST  Oscilloscope host [required]
+      --port PORT  Oscilloscope port [default: 5555]
+  -v, --verbose    Enable additional verbosity for debugging purposes
 
 Workflows:
-  default        Configure scope to measure built in 1KHz calibration wave
-  reset          Send *RST command. Restores instrument to the default state
+  default          Configure scope to measure built in 1KHz calibration wave
+  reset            Send *RST command. Restores instrument to the default state
 )";
 
     fmt::print("-- DS1000Z-ScopeInterface | v{}\n", PROJECT_VERSION);
