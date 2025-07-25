@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import sys
 import click
 import commands
 
@@ -16,7 +17,10 @@ def reset() -> None:
 
 @main.command(help="Configure scope to measure built in 1KHz calibration wave.")
 def default() -> None:
-    commands.run_default()
+    try:
+        commands.run_default()
+    except RuntimeError as e:
+        sys.exit(str(e))
 
 
 if __name__ == "__main__":
