@@ -12,6 +12,12 @@ class WaveformPreamble:
     xincrement: float
 
 
+@dataclasses.dataclass
+class WaveformResults:
+    time: list[float]
+    voltage: list[float]
+
+
 class ScopeConnection:
 
     def __init__(self, host: str, port: int) -> None:
@@ -161,7 +167,7 @@ class ScopeConnection:
 
         return WaveformPreamble(points=int(preamble[2]), xincrement=float(preamble[4]))
 
-    def read_waveform_data(self) -> list[float]:
+    def read_waveform_data(self) -> WaveformResults:
         Logger.debug("Setting the channel from which the waveform data will be read")
         self.conn.write(":WAV:SOUR CHAN1")
         self._check_for_error()
@@ -176,12 +182,21 @@ class ScopeConnection:
         self.conn.write(":WAV:FORM ASC")
         self._check_for_error()
 
-        print(self.read_waveform_preamble())
+        preamble = self.read_waveform_preamble()
 
         Logger.debug("Querying data")
         self.conn.write(":WAV:DATA?")
 
         raw_data = self.conn.read()
         # self._check_for_error()
-        data = raw_data.split(",")[1:-1]
-        return [float(i) for i in data]
+
+        voltage = []
+        time = []
+        t = 0.00
+
+        for d in raw_data.split(",")[1:-1]:
+            voltage.append(float(d))
+            time.append(t)
+            t += preamble.xincrement
+
+        return WaveformResults(voltage=voltage, time=time)
