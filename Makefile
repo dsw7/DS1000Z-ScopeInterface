@@ -1,8 +1,5 @@
-.PHONY = clean py
+.PHONY = py
 .DEFAULT_GOAL = py
-
-clean:
-	@rm -rfv dist/ *.egg-info/
 
 py:
 	@black src
