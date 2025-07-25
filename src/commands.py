@@ -14,4 +14,8 @@ def run_reset() -> None:
 
 def run_default() -> None:
     params = Parameters()
-    client.connect_to_device(host=params.host, port=params.port)
+
+    with client.DeviceConnection(host=params.host, port=params.port) as conn:
+        conn.write("*IDN?\n")
+        response = conn.read()
+        print("Received response:", response)
