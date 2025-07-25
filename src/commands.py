@@ -16,6 +16,4 @@ def run_default() -> None:
     params = Parameters()
 
     with client.DeviceConnection(host=params.host, port=params.port) as conn:
-        conn.write("*IDN?\n")
-        response = conn.read()
-        print("Received response:", response)
+        conn.handshake()
