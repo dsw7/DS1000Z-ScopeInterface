@@ -24,3 +24,4 @@ def run_default() -> None:
         conn.set_timebase(secs_per_div=0.0005)
         conn.set_channel_scale(volts_per_div=1.00)
         conn.set_rising_edge_trigger(trigger_level=1.00)
+        conn.set_horizontal_position(h_pos=0.00)

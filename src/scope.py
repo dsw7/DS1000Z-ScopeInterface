@@ -27,6 +27,30 @@ class ScopeConnection:
                 f"Scope returned an error. The code was: {code}. The message was: {errmsg}"
             )
 
+    def _get_vertical_limits(self) -> tuple[float, float]:
+        Logger.debug("Getting vertical limits")
+
+        self.conn.write(":CHAN1:SCAL?")
+        scale = self.conn.read()
+        self._check_for_error()
+
+        volts_per_div = float(scale)
+        v_max = volts_per_div * 4
+        v_min = volts_per_div * -4
+        return v_min, v_max
+
+    def _get_horizontal_limits(self) -> tuple[float, float]:
+        Logger.debug("Getting horizontal limits")
+
+        self.conn.write(":TIM:MAIN:SCAL?")
+        scale = self.conn.read()
+        self._check_for_error()
+
+        secs_per_div = float(scale)
+        t_max = secs_per_div * 6
+        t_min = secs_per_div * -6
+        return t_min, t_max
+
     def handshake(self) -> None:
         Logger.debug("Handshaking with device")
 
@@ -69,19 +93,8 @@ class ScopeConnection:
         self.conn.write(f":CHAN1:SCAL {volts_per_div}")
         self._check_for_error()
 
-    def get_vertical_limits(self) -> tuple[float, float]:
-        Logger.debug("Getting vertical limits")
-        self.conn.write(":CHAN1:SCAL?")
-        scale = self.conn.read()
-        self._check_for_error()
-
-        volts_per_div = float(scale)
-        v_max = volts_per_div * 4
-        v_min = volts_per_div * -4
-        return v_min, v_max
-
     def set_rising_edge_trigger(self, trigger_level: float = 1.00) -> None:
-        v_min, v_max = self.get_vertical_limits()
+        v_min, v_max = self._get_vertical_limits()
 
         if trigger_level < v_min or trigger_level > v_max:
             # I/O between machine and scope will crash if we try to set trigger outside of limits
@@ -100,4 +113,16 @@ class ScopeConnection:
         self._check_for_error()
 
         self.conn.write(":TRIG:EDG:SLOP POS")
+        self._check_for_error()
+
+    def set_horizontal_position(self, h_pos: float = 0.00) -> None:
+        t_min, t_max = self._get_horizontal_limits()
+
+        if h_pos < t_min or h_pos > t_max:
+            raise RuntimeError(
+                f"Horizontal position (x) outside limits. The limits are {t_min} s and +{t_max} s"
+            )
+
+        Logger.debug("Setting horizontal position to %f seconds", h_pos)
+        self.conn.write(f":TIM:MAIN:OFFS {h_pos}")
         self._check_for_error()
