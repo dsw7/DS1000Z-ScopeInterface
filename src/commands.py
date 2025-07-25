@@ -1,4 +1,5 @@
 import dataclasses
+import matplotlib.pyplot as plt
 import scope
 
 
@@ -26,3 +27,7 @@ def run_default() -> None:
         conn.set_rising_edge_trigger(trigger_level=1.00)
         conn.set_horizontal_position(t_pos=0.00)
         conn.set_vertical_position(v_pos=0.00)
+        conn.set_single_shot()
+        data = conn.read_waveform_data()
+        plt.plot(data)
+        plt.show()

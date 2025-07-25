@@ -138,3 +138,30 @@ class ScopeConnection:
         Logger.debug("Setting vertical position to %f volts", v_pos)
         self.conn.write(f":CHAN1:OFFS {v_pos}")
         self._check_for_error()
+
+    def set_single_shot(self) -> None:
+        Logger.debug("Setting scope to single trigger mode")
+        self.conn.write(":SING")
+        self._check_for_error()
+
+    def read_waveform_data(self) -> list[float]:
+        Logger.debug("Setting the channel from which the waveform data will be read")
+        self.conn.write(":WAV:SOUR CHAN1")
+        self._check_for_error()
+
+        Logger.debug(
+            "Setting the waveform reading mode to read all data displayed on screen"
+        )
+        self.conn.write(":WAV:MODE NORM")
+        self._check_for_error()
+
+        Logger.debug("Setting the return format of the waveform data to ASCII")
+        self.conn.write(":WAV:FORM ASC")
+        self._check_for_error()
+
+        Logger.debug("Querying data")
+        self.conn.write(":WAV:DATA?")
+
+        raw_data = self.conn.read()
+        data = raw_data.split(",")[1:-1]
+        return [float(i) for i in data]
