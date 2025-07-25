@@ -37,7 +37,7 @@ class _TelnetConnection:
             raise RuntimeError(f"Failed to send message: {e}") from e
 
 
-class DeviceConnection:
+class ScopeConnection:
 
     def __init__(self, host: str, port: int) -> None:
         self.conn = _TelnetConnection(host=host, port=port)
@@ -49,8 +49,19 @@ class DeviceConnection:
     def __exit__(self, exc_type, exc_val, exc_tb) -> None:  # type: ignore
         self.conn.close()
 
+    def _check_for_error(self) -> None:
+        self.conn.write(":SYST:ERR?\n")
+        response = self.conn.read()
+        code, errmsg = response.strip().split(",")
+
+        if code != "0":
+            raise RuntimeError(
+                f"Scope returned an error. The code was: {code}. The message was: {errmsg}"
+            )
+
     def handshake(self) -> None:
         print("Handshaking with device")
         self.conn.write("*IDN?\n")
         response = self.conn.read()
+        self._check_for_error()
         print("Received response:", response.strip())
