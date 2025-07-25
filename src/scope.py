@@ -1,8 +1,15 @@
+import dataclasses
 import logging
 import typing
 import tcp_conn
 
 Logger = logging.getLogger(__name__)
+
+
+@dataclasses.dataclass
+class WaveformPreamble:
+    points: int
+    xincrement: float
 
 
 class ScopeConnection:
@@ -144,6 +151,16 @@ class ScopeConnection:
         self.conn.write(":SING")
         self._check_for_error()
 
+    def read_waveform_preamble(self) -> WaveformPreamble:
+        Logger.debug("Reading waveform preamble")
+
+        self.conn.write(":WAV:PRE?")
+        # self._check_for_error()
+        raw_data = self.conn.read()
+        preamble = raw_data.split(",")
+
+        return WaveformPreamble(points=int(preamble[2]), xincrement=float(preamble[4]))
+
     def read_waveform_data(self) -> list[float]:
         Logger.debug("Setting the channel from which the waveform data will be read")
         self.conn.write(":WAV:SOUR CHAN1")
@@ -159,9 +176,12 @@ class ScopeConnection:
         self.conn.write(":WAV:FORM ASC")
         self._check_for_error()
 
+        print(self.read_waveform_preamble())
+
         Logger.debug("Querying data")
         self.conn.write(":WAV:DATA?")
 
         raw_data = self.conn.read()
+        # self._check_for_error()
         data = raw_data.split(",")[1:-1]
         return [float(i) for i in data]
