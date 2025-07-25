@@ -34,23 +34,31 @@ class ScopeConnection:
         self.conn.close()
 
     def _check_for_error(self) -> None:
+        # Should be used directly after a SCPI "set" operation
+
         self.conn.write(":SYST:ERR?")
-        response = self.conn.read()
-        code, errmsg = response.split(",")
+        message = self.conn.read()
+        code, errmsg = message.split(",")
 
         if code != "0":
             raise RuntimeError(
                 f"Scope returned an error. The code was: {code}. The message was: {errmsg}"
             )
 
+    def _check_message_for_error(self, message: str) -> None:
+        # Should be used directly after a SCPI "query" operation
+
+        if message == "Command error":
+            self._check_for_error()
+
     def _get_vertical_limits(self) -> tuple[float, float]:
         Logger.debug("Getting vertical limits")
 
         self.conn.write(f":CHAN{self.chan}:SCAL?")
-        scale = self.conn.read()
-        self._check_for_error()
+        message = self.conn.read()
+        self._check_message_for_error(message)
 
-        volts_per_div = float(scale)
+        volts_per_div = float(message)
         v_max = volts_per_div * 4
         v_min = volts_per_div * -4
         return v_min, v_max
@@ -59,10 +67,10 @@ class ScopeConnection:
         Logger.debug("Getting horizontal limits")
 
         self.conn.write(":TIM:MAIN:SCAL?")
-        scale = self.conn.read()
-        self._check_for_error()
+        message = self.conn.read()
+        self._check_message_for_error(message)
 
-        secs_per_div = float(scale)
+        secs_per_div = float(message)
         t_max = secs_per_div * 6
         t_min = secs_per_div * -6
         return t_min, t_max
@@ -71,10 +79,10 @@ class ScopeConnection:
         Logger.debug("Handshaking with device")
 
         self.conn.write("*IDN?")
-        response = self.conn.read()
+        message = self.conn.read()
+        self._check_message_for_error(message)
 
-        self._check_for_error()
-        components = response.split(",")
+        components = message.split(",")
 
         if len(components) != 4:
             raise RuntimeError(
@@ -164,10 +172,10 @@ class ScopeConnection:
         Logger.debug("Reading waveform preamble")
 
         self.conn.write(":WAV:PRE?")
-        # self._check_for_error()
-        raw_data = self.conn.read()
-        preamble = raw_data.split(",")
+        message = self.conn.read()
+        self._check_message_for_error(message)
 
+        preamble = message.split(",")
         return WaveformPreamble(points=int(preamble[2]), xincrement=float(preamble[4]))
 
     def read_waveform_data(self) -> WaveformResults:
@@ -190,14 +198,14 @@ class ScopeConnection:
         Logger.debug("Querying data")
         self.conn.write(":WAV:DATA?")
 
-        raw_data = self.conn.read()
-        # self._check_for_error()
+        message = self.conn.read()
+        self._check_message_for_error(message)
 
         voltage = []
         time = []
         t = 0.00
 
-        for d in raw_data.split(",")[1:-1]:
+        for d in message.split(",")[1:-1]:
             voltage.append(float(d))
             time.append(t)
             t += preamble.xincrement
