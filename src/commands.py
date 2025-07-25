@@ -9,7 +9,11 @@ class Parameters:
 
 
 def run_reset() -> None:
-    pass
+    params = Parameters()
+
+    with client.ScopeConnection(host=params.host, port=params.port) as conn:
+        conn.handshake()
+        conn.reset()
 
 
 def run_default() -> None:

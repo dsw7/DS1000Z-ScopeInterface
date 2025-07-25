@@ -84,3 +84,9 @@ class ScopeConnection:
         Logger.debug("-- Model:             %s", components[1])
         Logger.debug("-- Serial number:     %s", components[2])
         Logger.debug("-- Software version:  %s", components[3])
+
+    def reset(self) -> None:
+        Logger.debug("Resetting device")
+
+        self.conn.write("*RST")
+        self._check_for_error()
