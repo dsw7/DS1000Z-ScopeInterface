@@ -98,3 +98,11 @@ class ScopeConnection:
         Logger.debug("Setting timebase to %f seconds", secs_per_div)
         self.conn.write(f":TIM:MAIN:SCAL {secs_per_div}")
         self._check_for_error()
+
+    def set_channel_scale(self, volts_per_div: float = 1.00) -> None:
+        if volts_per_div < -0.01 or volts_per_div > 100:
+            raise RuntimeError("Vertical scale must be between 0.01V and 100V")
+
+        Logger.debug("Setting vertical scale to %f volts", volts_per_div)
+        self.conn.write(f":CHAN1:SCAL {volts_per_div}")
+        self._check_for_error()

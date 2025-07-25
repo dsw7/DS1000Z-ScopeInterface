@@ -22,3 +22,4 @@ def run_default() -> None:
     with client.ScopeConnection(host=params.host, port=params.port) as conn:
         conn.handshake()
         conn.set_timebase(secs_per_div=0.0005)
+        conn.set_channel_scale(volts_per_div=1.00)
