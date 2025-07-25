@@ -3,6 +3,8 @@ import logging
 import typing
 import tcp_conn
 
+Channels: typing.TypeAlias = typing.Literal[1, 2, 3, 4]
+
 Logger = logging.getLogger(__name__)
 
 
@@ -20,7 +22,8 @@ class WaveformResults:
 
 class ScopeConnection:
 
-    def __init__(self, host: str, port: int) -> None:
+    def __init__(self, host: str, port: int, chan: Channels = 1) -> None:
+        self.chan = chan
         self.conn = tcp_conn.TCPConnection(host=host, port=port)
 
     def __enter__(self) -> typing.Self:
@@ -43,7 +46,7 @@ class ScopeConnection:
     def _get_vertical_limits(self) -> tuple[float, float]:
         Logger.debug("Getting vertical limits")
 
-        self.conn.write(":CHAN1:SCAL?")
+        self.conn.write(f":CHAN{self.chan}:SCAL?")
         scale = self.conn.read()
         self._check_for_error()
 
@@ -103,7 +106,7 @@ class ScopeConnection:
             raise RuntimeError("Vertical scale must be between 0.01V and 100V")
 
         Logger.debug("Setting vertical scale to %f volts", volts_per_div)
-        self.conn.write(f":CHAN1:SCAL {volts_per_div}")
+        self.conn.write(f":CHAN{self.chan}:SCAL {volts_per_div}")
         self._check_for_error()
 
     def set_rising_edge_trigger(self, trigger_level: float = 1.00) -> None:
@@ -122,7 +125,7 @@ class ScopeConnection:
         self.conn.write(f":TRIG:EDG:LEV {trigger_level}")
         self._check_for_error()
 
-        self.conn.write(":TRIG:EDG:SOUR CHAN1")
+        self.conn.write(f":TRIG:EDG:SOUR CHAN{self.chan}")
         self._check_for_error()
 
         self.conn.write(":TRIG:EDG:SLOP POS")
@@ -149,7 +152,7 @@ class ScopeConnection:
             )
 
         Logger.debug("Setting vertical position to %f volts", v_pos)
-        self.conn.write(f":CHAN1:OFFS {v_pos}")
+        self.conn.write(f":CHAN{self.chan}:OFFS {v_pos}")
         self._check_for_error()
 
     def set_single_shot(self) -> None:
@@ -169,7 +172,7 @@ class ScopeConnection:
 
     def read_waveform_data(self) -> WaveformResults:
         Logger.debug("Setting the channel from which the waveform data will be read")
-        self.conn.write(":WAV:SOUR CHAN1")
+        self.conn.write(f":WAV:SOUR CHAN{self.chan}")
         self._check_for_error()
 
         Logger.debug(
