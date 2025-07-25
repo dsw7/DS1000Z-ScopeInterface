@@ -22,19 +22,22 @@ class _TelnetConnection:
         self.socket.close()
         print(f"Connection to {self.host}:{self.port} closed")
 
+    def write(self, command: str) -> None:
+        if not command.endswith("\n"):
+            command += "\n"
+
+        try:
+            self.socket.sendall(command.encode())
+        except OSError as e:
+            raise RuntimeError(f"Failed to send message: {e}") from e
+
     def read(self, buffer_size: int = 4096) -> str:
         try:
             response = self.socket.recv(buffer_size)
         except OSError as e:
             raise RuntimeError(f"Failed to receive message: {e}") from e
 
-        return response.decode()
-
-    def write(self, command: str) -> None:
-        try:
-            self.socket.sendall(command.encode())
-        except OSError as e:
-            raise RuntimeError(f"Failed to send message: {e}") from e
+        return response.decode().strip()
 
 
 class ScopeConnection:
@@ -50,9 +53,9 @@ class ScopeConnection:
         self.conn.close()
 
     def _check_for_error(self) -> None:
-        self.conn.write(":SYST:ERR?\n")
+        self.conn.write(":SYST:ERR?")
         response = self.conn.read()
-        code, errmsg = response.strip().split(",")
+        code, errmsg = response.split(",")
 
         if code != "0":
             raise RuntimeError(
@@ -61,7 +64,7 @@ class ScopeConnection:
 
     def handshake(self) -> None:
         print("Handshaking with device")
-        self.conn.write("*IDN?\n")
+        self.conn.write("*IDN?")
         response = self.conn.read()
         self._check_for_error()
-        print("Received response:", response.strip())
+        print("Received response:", response)

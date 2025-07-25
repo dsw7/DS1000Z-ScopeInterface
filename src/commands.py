@@ -15,5 +15,5 @@ def run_reset() -> None:
 def run_default() -> None:
     params = Parameters()
 
-    with client.DeviceConnection(host=params.host, port=params.port) as conn:
+    with client.ScopeConnection(host=params.host, port=params.port) as conn:
         conn.handshake()
