@@ -64,7 +64,20 @@ class ScopeConnection:
 
     def handshake(self) -> None:
         print("Handshaking with device")
+
         self.conn.write("*IDN?")
         response = self.conn.read()
+
         self._check_for_error()
-        print("Received response:", response)
+        components = response.split(",")
+
+        if len(components) != 4:
+            raise RuntimeError(
+                "Something went wrong. *IDN? query did not return a valid ID string"
+            )
+
+        print("Handshake returned:")
+        print(f"-- Name:              {components[0]}")
+        print(f"-- Model:             {components[1]}")
+        print(f"-- Serial number:     {components[2]}")
+        print(f"-- Software version:  {components[3]}")
