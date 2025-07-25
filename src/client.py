@@ -90,3 +90,11 @@ class ScopeConnection:
 
         self.conn.write("*RST")
         self._check_for_error()
+
+    def set_timebase(self, secs_per_div: float = 0.0005) -> None:
+        if secs_per_div <= 0 or secs_per_div > 50:
+            raise RuntimeError("Timebase must be > 0 and <= 50 seconds")
+
+        Logger.debug("Setting timebase to %f seconds", secs_per_div)
+        self.conn.write(f":TIM:MAIN:SCAL {secs_per_div}")
+        self._check_for_error()
