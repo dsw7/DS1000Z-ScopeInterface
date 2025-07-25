@@ -115,14 +115,26 @@ class ScopeConnection:
         self.conn.write(":TRIG:EDG:SLOP POS")
         self._check_for_error()
 
-    def set_horizontal_position(self, h_pos: float = 0.00) -> None:
+    def set_horizontal_position(self, t_pos: float = 0.00) -> None:
         t_min, t_max = self._get_horizontal_limits()
 
-        if h_pos < t_min or h_pos > t_max:
+        if t_pos < t_min or t_pos > t_max:
             raise RuntimeError(
                 f"Horizontal position (x) outside limits. The limits are {t_min} s and +{t_max} s"
             )
 
-        Logger.debug("Setting horizontal position to %f seconds", h_pos)
-        self.conn.write(f":TIM:MAIN:OFFS {h_pos}")
+        Logger.debug("Setting horizontal position to %f seconds", t_pos)
+        self.conn.write(f":TIM:MAIN:OFFS {t_pos}")
+        self._check_for_error()
+
+    def set_vertical_position(self, v_pos: float = 0.00) -> None:
+        v_min, v_max = self._get_vertical_limits()
+
+        if v_pos < v_min or v_pos > v_max:
+            raise RuntimeError(
+                f"Vertical position (y) outside limits. The limits are {v_min}V and +{v_max}V"
+            )
+
+        Logger.debug("Setting vertical position to %f volts", v_pos)
+        self.conn.write(f":CHAN1:OFFS {v_pos}")
         self._check_for_error()
