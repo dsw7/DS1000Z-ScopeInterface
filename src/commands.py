@@ -1,5 +1,5 @@
 import dataclasses
-import client
+import scope
 
 
 @dataclasses.dataclass
@@ -11,7 +11,7 @@ class Parameters:
 def run_reset() -> None:
     params = Parameters()
 
-    with client.ScopeConnection(host=params.host, port=params.port) as conn:
+    with scope.ScopeConnection(host=params.host, port=params.port) as conn:
         conn.handshake()
         conn.reset()
 
@@ -19,7 +19,7 @@ def run_reset() -> None:
 def run_default() -> None:
     params = Parameters()
 
-    with client.ScopeConnection(host=params.host, port=params.port) as conn:
+    with scope.ScopeConnection(host=params.host, port=params.port) as conn:
         conn.handshake()
         conn.set_timebase(secs_per_div=0.0005)
         conn.set_channel_scale(volts_per_div=1.00)
