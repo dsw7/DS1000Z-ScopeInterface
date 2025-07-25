@@ -17,7 +17,10 @@ def main(debug: bool) -> None:
 
 @main.command(help="Restore instrument to the default state.")
 def reset() -> None:
-    commands.run_reset()
+    try:
+        commands.run_reset()
+    except RuntimeError as e:
+        sys.exit(str(e))
 
 
 @main.command(help="Configure scope to measure built in 1KHz calibration wave.")
