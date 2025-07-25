@@ -106,3 +106,36 @@ class ScopeConnection:
         Logger.debug("Setting vertical scale to %f volts", volts_per_div)
         self.conn.write(f":CHAN1:SCAL {volts_per_div}")
         self._check_for_error()
+
+    def get_vertical_limits(self) -> tuple[float, float]:
+        Logger.debug("Getting vertical limits")
+        self.conn.write(":CHAN1:SCAL?")
+        scale = self.conn.read()
+        self._check_for_error()
+
+        volts_per_div = float(scale)
+        v_max = volts_per_div * 4
+        v_min = volts_per_div * -4
+        return v_min, v_max
+
+    def set_rising_edge_trigger(self, trigger_level: float = 1.00) -> None:
+        v_min, v_max = self.get_vertical_limits()
+
+        if trigger_level < v_min or trigger_level > v_max:
+            # I/O between machine and scope will crash if we try to set trigger outside of limits
+            raise RuntimeError(
+                f"Trigger outside limits. The vertical limits are {v_min}V and +{v_max}V"
+            )
+
+        self.conn.write(":TRIG:MODE EDGE")
+        self._check_for_error()
+
+        Logger.debug("Setting trigger level to %f volts", trigger_level)
+        self.conn.write(f":TRIG:EDG:LEV {trigger_level}")
+        self._check_for_error()
+
+        self.conn.write(":TRIG:EDG:SOUR CHAN1")
+        self._check_for_error()
+
+        self.conn.write(":TRIG:EDG:SLOP POS")
+        self._check_for_error()
