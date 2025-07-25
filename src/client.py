@@ -1,5 +1,8 @@
+import logging
 import typing
 import socket
+
+Logger = logging.getLogger(__name__)
 
 
 class _TelnetConnection:
@@ -12,7 +15,7 @@ class _TelnetConnection:
     def connect(self) -> None:
         try:
             self.socket.connect((self.host, self.port))
-            print(f"Connected to {self.host}:{self.port}")
+            Logger.debug("Connected to %s:%i", self.host, self.port)
         except OSError as e:
             raise RuntimeError(
                 f"Could not connect on {self.host}:{self.port}: {e}"
@@ -20,7 +23,7 @@ class _TelnetConnection:
 
     def close(self) -> None:
         self.socket.close()
-        print(f"Connection to {self.host}:{self.port} closed")
+        Logger.debug("Connection to %s:%i closed", self.host, self.port)
 
     def write(self, command: str) -> None:
         if not command.endswith("\n"):
@@ -63,7 +66,7 @@ class ScopeConnection:
             )
 
     def handshake(self) -> None:
-        print("Handshaking with device")
+        Logger.debug("Handshaking with device")
 
         self.conn.write("*IDN?")
         response = self.conn.read()
@@ -76,8 +79,8 @@ class ScopeConnection:
                 "Something went wrong. *IDN? query did not return a valid ID string"
             )
 
-        print("Handshake returned:")
-        print(f"-- Name:              {components[0]}")
-        print(f"-- Model:             {components[1]}")
-        print(f"-- Serial number:     {components[2]}")
-        print(f"-- Software version:  {components[3]}")
+        Logger.debug("Handshake returned:")
+        Logger.debug("-- Name:              %s", components[0])
+        Logger.debug("-- Model:             %s", components[1])
+        Logger.debug("-- Serial number:     %s", components[2])
+        Logger.debug("-- Software version:  %s", components[3])
